@@ -36,7 +36,7 @@
 
 <script>
 import { login, getAdminInfo, getCodeImg, getCode } from "@/api/getData";
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapState,mapMutations } from "vuex";
 
 export default {
   data() {
@@ -63,14 +63,22 @@ export default {
   },
   mounted() {
     this.showLogin = true;
-    if (!this.adminInfo.id) {
-      this.getAdminData()
+    if (!this.adminInfo.ID) {
+      if(localStorage.adminInfo){
+        this.saveAdminInfo(JSON.parse(localStorage.adminInfo));
+        this.$router.push('manage');
+      }else{
+        this.getAdminData()
+      }
+    }else{
+      this.$router.push('manage');
     }
   },
   computed: {
     ...mapState(["adminInfo"])
   },
   methods: {
+    ...mapMutations(["saveAdminInfo"]),
     ...mapActions(["getAdminData"]),
     async submitForm(formName) {
       this.$refs[formName].validate(async valid => {
@@ -79,12 +87,10 @@ export default {
 					let loginData = new FormData();
       		loginData.append("Act", "User_Login");
 					loginData.append("Param", JSON.stringify(formString));
-					console.log(formString);
-					
 					const res = await login(loginData);
-					console.log(res);
-					
           if (res.Result) {
+            localStorage.adminInfo = JSON.stringify(res.Data);
+            this.saveAdminInfo(res.Data);
             this.$message({
               type: "success",
               message: "登录成功"
@@ -111,7 +117,6 @@ export default {
       data.append("Act", "Common_GetRandomUID");
       data.append("Param", "{}");
       const res = await getCode(data);
-      console.log(res);
       if (res.Result) {
         this.loginForm.verificationCodeUID = res.Data.RandomUID;
         this.loginForm.codeUIDRandom = this.loginForm.verificationCodeUID ;
@@ -123,15 +128,16 @@ export default {
     }
   },
   watch: {
-    adminInfo: function(newValue) {
-      if (newValue.id) {
-        this.$message({
-          type: "success",
-          message: "检测到您之前登录过，将自动登录"
-        });
-        this.$router.push("manage");
-      }
-    }
+    // adminInfo: function(newValue) {
+    //   if (newValue.ID) {
+    //     this.$message({
+    //       type: "success",
+    //       message: "检测到您之前登录过，将自动登录"
+    //     });
+    //     this.$router.push("manage");
+    //     console.log("检测到您之前登录过，将自动登录");
+    //   }
+    // }
   }
 };
 </script>

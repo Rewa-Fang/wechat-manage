@@ -55,39 +55,74 @@ export default {
         item_count: 5,
         item: [
           {
-            media_id: "1",
-            name: "111.jpg",
-            update_time: "20180808",
+            media_id: "yzait9Fj4D9uLQ-3yewqKdsLt85FO_Vp3KkKXGHOjXw",
+            name: "abc.jpg",
+            update_time: 1533705479,
             url:
-              "https://mmbiz.qpic.cn/mmbiz_jpg/Sl5K19wIuIRbV8SJYfTCO7RribQxjcvzmaarTtgPxjPHcsdiauj7CrnsmUcrNkzYWd9feUicZvu7bFmRq63WJ5JDw/0?wx_fmt=jpeg"
+              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqibKwggAsETNN6qVmVA5xH03YXMUIz6CyTUQQghyGpicFxMNRlDkNJzvEw/0?wx_fmt=jpeg"
           },
           {
-            media_id: "2",
-            name: "222.jpg",
-            update_time: "20180809",
+            media_id: "yzait9Fj4D9uLQ-3yewqKTPxz91gfesBgmiq8FJklQU",
+            name: "hope.jpg",
+            update_time: 1533703436,
             url:
-              "https://mmbiz.qpic.cn/mmbiz_jpg/Sl5K19wIuIRbV8SJYfTCO7RribQxjcvzmaarTtgPxjPHcsdiauj7CrnsmUcrNkzYWd9feUicZvu7bFmRq63WJ5JDw/0?wx_fmt=jpeg"
+              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqib0UpwInVlZCIsX9WZgvQq0ia4fXMGR2zlD1mKY1yqva30Kz9h11icIgxg/0?wx_fmt=jpeg"
           },
           {
-            media_id: "3",
-            name: "333.jpg",
-            update_time: "20180808",
+            media_id: "yzait9Fj4D9uLQ-3yewqKYqD3l0qE3oZPpHNZ0qg68U",
+            name: "abc.jpg",
+            update_time: 1533702040,
             url:
-              "https://mmbiz.qpic.cn/mmbiz_jpg/Sl5K19wIuIRbV8SJYfTCO7RribQxjcvzmaarTtgPxjPHcsdiauj7CrnsmUcrNkzYWd9feUicZvu7bFmRq63WJ5JDw/0?wx_fmt=jpeg"
+              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqibKwggAsETNN6qVmVA5xH03YXMUIz6CyTUQQghyGpicFxMNRlDkNJzvEw/0?wx_fmt=jpeg"
           },
           {
-            media_id: "4",
-            name: "444.jpg",
-            update_time: "20180808",
+            media_id: "yzait9Fj4D9uLQ-3yewqKSaDltyxyfvM5JFV8xgKLm0",
+            name: "abc.jpg",
+            update_time: 1533697754,
             url:
-              "https://mmbiz.qpic.cn/mmbiz_jpg/Sl5K19wIuIRbV8SJYfTCO7RribQxjcvzmaarTtgPxjPHcsdiauj7CrnsmUcrNkzYWd9feUicZvu7bFmRq63WJ5JDw/0?wx_fmt=jpeg"
+              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqibKwggAsETNN6qVmVA5xH03YXMUIz6CyTUQQghyGpicFxMNRlDkNJzvEw/0?wx_fmt=jpeg"
           },
           {
-            media_id: "5",
-            name: "555.jpg",
-            update_time: "20180808",
+            media_id: "yzait9Fj4D9uLQ-3yewqKRPtLeyRRCXcaTjbmzdursw",
+            name: "abc.jpg",
+            update_time: 1533697733,
             url:
-              "https://mmbiz.qpic.cn/mmbiz_jpg/Sl5K19wIuIRbV8SJYfTCO7RribQxjcvzmaarTtgPxjPHcsdiauj7CrnsmUcrNkzYWd9feUicZvu7bFmRq63WJ5JDw/0?wx_fmt=jpeg"
+              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqibKwggAsETNN6qVmVA5xH03YXMUIz6CyTUQQghyGpicFxMNRlDkNJzvEw/0?wx_fmt=jpeg"
+          },
+          {
+            media_id: "yzait9Fj4D9uLQ-3yewqKSp9nrV1zRnda-wWpS8WacY",
+            name: "0.jpg",
+            update_time: 1533696001,
+            url:
+              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqib7jvoAzeJRnxy8OSVPciaJEXtsNfZlne0Sloge2GAF5t8cnZyZ42MorQ/0?wx_fmt=jpeg"
+          },
+          {
+            media_id: "yzait9Fj4D9uLQ-3yewqKc8Ww3-WMiROHNkj0XPH0gI",
+            name: "89802Gibbon_monkey_dog_tail.gif",
+            update_time: 1533695103,
+            url:
+              "http://mmbiz.qpic.cn/mmbiz_gif/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqibHWAkJkQx0zGafbVQzkyT1icScTaAWsl56GicnHE7RF780FXjSH5rZwVQ/0?wx_fmt=gif"
+          },
+          {
+            media_id: "yzait9Fj4D9uLQ-3yewqKTUFkNk9JRZWsdg7VfJ0nHQ",
+            name: "0.jpg",
+            update_time: 1533695051,
+            url:
+              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqib7jvoAzeJRnxy8OSVPciaJEXtsNfZlne0Sloge2GAF5t8cnZyZ42MorQ/0?wx_fmt=jpeg"
+          },
+          {
+            media_id: "yzait9Fj4D9uLQ-3yewqKQn_0ukmWIs5sBfrkQOx7KQ",
+            name: "abc.jpg",
+            update_time: 1533694987,
+            url:
+              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqibKwggAsETNN6qVmVA5xH03YXMUIz6CyTUQQghyGpicFxMNRlDkNJzvEw/0?wx_fmt=jpeg"
+          },
+          {
+            media_id: "yzait9Fj4D9uLQ-3yewqKdkAl5-8Vjp1OKx8ZCF5w6U",
+            name: "20180807125639F4L4X04F.jpg",
+            update_time: 1533617802,
+            url:
+              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3NrjdZZsouibbq8k0gP17AUHzicGqruEbUvDuSwFYaS0HCtxyCDRBkg6Fric2SAHZMuVtpicztnXRYYv8A/0?wx_fmt=jpeg"
           }
         ]
       },
@@ -111,8 +146,13 @@ export default {
   },
   watch: {
     checkedImageArr(val) {
-      this.delBtnDisabled = val.length > 0 ? false : true;
-      console.log(val.length);
+      // this.delBtnDisabled = val.length > 0 ? false : true;
+      if (val.length > 0) {
+        this.delBtnDisabled = false;
+      } else {
+        this.delBtnDisabled = true;
+        this.isAllChecked = false;
+      }
     }
   },
   created() {
@@ -189,20 +229,19 @@ export default {
         type: "warning"
       })
         .then(() => {
-          let postData = new FormData();
-          postData.append("Act", "Material_Del");
-          postData.append("Verification", this.upLoadImgData.Verification);
-
           if (this.checkedImageArr.length > 0) {
-            this.imageList.item.forEach(img => {
+            this.checkedImageArr.forEach(img => {
+              let postData = new FormData();
+              postData.append("Act", "Material_Del");
+              postData.append("Verification", this.upLoadImgData.Verification);
               postData.append(
                 "Param",
                 JSON.stringify({
-                  media_id: img.media_id
+                  media_id: img
                 })
               );
               console.log(postData);
-              
+
               this.deleteImgByMediaId(postData);
             });
           } else {

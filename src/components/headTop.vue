@@ -47,7 +47,7 @@ export default {
             type: "success",
             message: "退出成功"
           });
-          this.$router.push("/");
+          this.$router.push("/login");
         } else {
           this.$message({
             type: "error",

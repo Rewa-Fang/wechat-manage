@@ -2,9 +2,9 @@
 	<div class="manage_page fillcontain">
 		<head-top :pageTitle="pageTitle"></head-top>
 		<el-row style="height: 100%;">
-			<el-col :span="4" style="min-height: 100%; background-color: #324057;">
+			<el-col :span="3" style="min-height: 100%; background-color: #324057;">
 				<el-menu :default-active="defaultActive" style="min-height: 100%;" theme="dark" router>
-					<el-menu-item index="manage">
+					<el-menu-item index="/">
 						<i class="el-icon-menu"></i>首页</el-menu-item>
 					<el-submenu index="2">
 						<template slot="title">
@@ -46,8 +46,7 @@
 					</el-submenu>
 				</el-menu>
 			</el-col>
-			<el-col :span="20" class="view-page">
-
+			<el-col :span="21" class="view-page">
 				<keep-alive>
 					<router-view></router-view>
 				</keep-alive>

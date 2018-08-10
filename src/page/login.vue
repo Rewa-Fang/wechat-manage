@@ -66,12 +66,12 @@ export default {
     if (!this.adminInfo.ID) {
       if(localStorage.adminInfo){
         this.saveAdminInfo(JSON.parse(localStorage.adminInfo));
-        this.$router.push('manage');
+        this.$router.push('/');
       }else{
         this.getAdminData()
       }
     }else{
-      this.$router.push('manage');
+      this.$router.push('/');
     }
   },
   computed: {
@@ -95,7 +95,7 @@ export default {
               type: "success",
               message: "登录成功"
             });
-            this.$router.push("manage");
+            this.$router.push("/");
           } else {
             this.$message({
               type: "error",

@@ -1,6 +1,7 @@
 import { baseUrl } from './env'
 
 export default async (url = '', data = {}, type = 'GET', method = 'fetch') => {
+	console.log('DATADATADATA:-----'+data);
 	type = type.toUpperCase();
 	url = baseUrl + url;
 
@@ -26,7 +27,9 @@ export default async (url = '', data = {}, type = 'GET', method = 'fetch') => {
 		if (type == 'POST') {
 			Object.defineProperty(requestConfig, 'body', {
 				value: data
-			})
+			});
+			console.log('datatataatatata:-----'+ JSON.stringify(requestConfig));
+			
 		}
 
 		try {
@@ -46,13 +49,16 @@ export default async (url = '', data = {}, type = 'GET', method = 'fetch') => {
 			}
 
 			let sendData = '';
-			if (type == 'POST') {
-				sendData = JSON.stringify(data);
-			}
+			// if (type == 'POST') {
+			// 	sendData = JSON.stringify(data);
+			// 	console.log("send:::"+data);
+			// 	console.log("send#####:::"+sendData);
+				
+			// }
 
 			requestObj.open(type, url, true);
-			requestObj.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			requestObj.send(sendData);
+			// requestObj.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			requestObj.send(data);
 
 			requestObj.onreadystatechange = () => {
 				if (requestObj.readyState == 4) {

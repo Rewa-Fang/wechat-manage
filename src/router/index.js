@@ -11,11 +11,11 @@ const media = r => require.ensure([], () => r(require('@/page/media')), 'media')
 
 const routes = [
 	{
-		path: '/',
+		path: '/login',
 		component: login
 	},
 	{
-		path: '/manage',
+		path: '/',
 		component: manage,
 		name: '',
 		meta: {
@@ -50,7 +50,7 @@ router.beforeEach((to, from, next) => {
 			next();
 		} else {
 			next({
-				path: '/'
+				path: '/login'
 			})
 		}
 	}

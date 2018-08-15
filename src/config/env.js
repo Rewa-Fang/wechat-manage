@@ -12,10 +12,10 @@ let baseImgPath;
 
 if (process.env.NODE_ENV == 'development') {
 	baseUrl = '//wechat.a2designing.cn/handlers';
-    baseImgPath = '//wechat.a2designing.cn/handlers/img/';
+    baseImgPath = '//wechat.a2designing.cn/';
 }else{
 	baseUrl = '//wechat.a2designing.cn/handlers';
-    baseImgPath = '//wechat.a2designing.cn/handlers/img/';
+    baseImgPath = '//wechat.a2designing.cn/';
 }
 
 export {

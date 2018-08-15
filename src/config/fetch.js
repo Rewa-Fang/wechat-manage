@@ -1,7 +1,7 @@
 import { baseUrl } from './env'
 
 export default async (url = '', data = {}, type = 'GET', method = 'fetch') => {
-	console.log('DATADATADATA:-----'+data);
+	// console.log('DATADATADATA:-----'+data);
 	type = type.toUpperCase();
 	url = baseUrl + url;
 
@@ -28,7 +28,7 @@ export default async (url = '', data = {}, type = 'GET', method = 'fetch') => {
 			Object.defineProperty(requestConfig, 'body', {
 				value: data
 			});
-			console.log('datatataatatata:-----'+ JSON.stringify(requestConfig));
+			// console.log('datatataatatata:-----'+ JSON.stringify(requestConfig));
 			
 		}
 

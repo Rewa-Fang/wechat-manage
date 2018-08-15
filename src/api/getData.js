@@ -38,3 +38,5 @@ export const getAdminInfo = () => fetch('/admin/info');
 export const getMaterialList = data => fetch('/ActionHandler.ashx', data, 'POST');
 
 export const deleteMateria = data => fetch('/ActionHandler.ashx', data, 'POST');
+
+export const postActionHandler = data => fetch('/ActionHandler.ashx', data, 'POST');

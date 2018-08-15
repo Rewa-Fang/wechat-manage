@@ -2,8 +2,11 @@
   <div>
 
     <el-row class="imgae-top">
-      <el-col :span="20">
-        <div class="image-count">视频(共{{ videoList.total_count }}条)</div>
+      <el-col :span="10">
+        <div class="image-count">视频(共{{ videoList.TotalCount }}条)</div>
+      </el-col>
+      <el-col :span="10" class="tips">
+        <span>格式支持mp4，文件大小不超过10M</span>
       </el-col>
       <el-col :span="4" class="upload-btn">
         <el-upload :action="upLoadVideoUrl" :data="upLoadVideoData" :show-file-list="false" :on-success="upLoadSuccess" :before-upload="beforeAvatarUpload">
@@ -13,24 +16,29 @@
     </el-row>
     <!-- <div>分组标签</div> -->
     <el-row class="img-list">
-      <el-table :data="videoList.item" style="width: 100%" :row-style="rowStyle">
-        <el-table-column label="名称">
+      <el-table :data="videoList.List" style="width: 100%" :row-style="rowStyle">
+        <el-table-column label="标题">
           <template slot-scope="scope">
             <div class="vieio-tab-name">
-              <img class="video-img" :src="scope.row.url" alt="">
-              <span style="margin-left: 10px">{{ scope.row.name }}</span>
+              <!-- <img class="video-img" :src="scope.row.url" alt=""> -->
+              <span style="margin-left: 10px">{{ scope.row.FileName }}</span>
             </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="描述">
+          <template slot-scope="scope">
+            <span>{{ scope.row.Introduction }}</span>
           </template>
         </el-table-column>
         <el-table-column label="更新时间">
           <template slot-scope="scope">
-            <span>{{ scope.row.update_time }}</span>
+            <span>{{ scope.row.CreatedDate | dateFormat }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-            <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+            <el-button size="mini" type="danger" @click="deleteVideo(scope.$index, scope.row.ID)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -39,69 +47,44 @@
 </template>
 
 <script>
-import { getMaterialList } from "@/api/getData";
+import { postActionHandler } from "@/api/getData";
 export default {
   data() {
     return {
       userInfo: {},
-      rowStyle: {
+      rowStyle: { 
         height: "130px"
       },
-      videoList: {
-        total_count: 5,
-        item_count: 5,
-        item: [
-          {
-            media_id: "1",
-            name: "111.jpg",
-            update_time: "20180808",
-            url:
-              "http://mmbiz.qpic.cn/mmbiz_jpg/ibprMm6WQqM1nroxn0R9t3WIwNPqpVjNoq7VhhroIrz53rdSHj2XqgTrsR7oCDmtqjrmQicUIoxY9icibGUg4HZatg/0"
-          },
-          {
-            media_id: "2",
-            name: "222.jpg",
-            update_time: "20180809",
-            url:
-              "https://mmbiz.qpic.cn/mmbiz_jpg/Sl5K19wIuIRbV8SJYfTCO7RribQxjcvzmaarTtgPxjPHcsdiauj7CrnsmUcrNkzYWd9feUicZvu7bFmRq63WJ5JDw/0?wx_fmt=jpeg"
-          },
-          {
-            media_id: "3",
-            name: "333.jpg",
-            update_time: "20180808",
-            url:
-              "https://mmbiz.qpic.cn/mmbiz_jpg/Sl5K19wIuIRbV8SJYfTCO7RribQxjcvzmaarTtgPxjPHcsdiauj7CrnsmUcrNkzYWd9feUicZvu7bFmRq63WJ5JDw/0?wx_fmt=jpeg"
-          },
-          {
-            media_id: "4",
-            name: "444.jpg",
-            update_time: "20180808",
-            url:
-              "https://mmbiz.qpic.cn/mmbiz_jpg/Sl5K19wIuIRbV8SJYfTCO7RribQxjcvzmaarTtgPxjPHcsdiauj7CrnsmUcrNkzYWd9feUicZvu7bFmRq63WJ5JDw/0?wx_fmt=jpeg"
-          },
-          {
-            media_id: "5",
-            name: "555.jpg",
-            update_time: "20180808",
-            url:
-              "https://mmbiz.qpic.cn/mmbiz_jpg/Sl5K19wIuIRbV8SJYfTCO7RribQxjcvzmaarTtgPxjPHcsdiauj7CrnsmUcrNkzYWd9feUicZvu7bFmRq63WJ5JDw/0?wx_fmt=jpeg"
-          }
-        ]
-      },
+      videoList: {},
       upLoadVideoUrl:
         "http://wechat.a2designing.cn/Handlers/ActionHandler.ashx",
       upLoadVideoData: {
         Act: "Material_Add",
-        Param: "{'type':'video'}",
+        Param:
+          "{'Type':3, 'Title': 'video upload', 'Introduction': 'video upload'}",
         Verification: ""
       },
       // 设置获取列表的素材类型及分页设置
       pageParam: {
-        type: "image",
-        offset: 0,
-        count: 20
+        Type: 3,
+        PageSize: 0,
+        PageNumber: 10
       }
     };
+  },
+  filters: {
+    dateFormat(timestamp) {
+      let date = new Date(timestamp * 1000);
+      let year = date.getFullYear(),
+        month = date.getMonth() + 1,
+        day = date.getDate();
+      let nowDateYear = new Date().getFullYear();
+      if (year == nowDateYear) {
+        return month + "月" + day + "日";
+      } else {
+        return year + "年" + month + "月" + day + "日";
+      }
+    }
   },
   created() {
     if (localStorage.adminInfo) {
@@ -110,7 +93,7 @@ export default {
         UserID: this.userInfo.ID,
         Token: this.userInfo.Token
       });
-      // this.getImageList();
+      this.getVideoList();
     } else {
       this.$router.push("/login");
     }
@@ -119,40 +102,42 @@ export default {
   methods: {
     upLoadSuccess(res, file) {
       if (res.Result) {
-        Object.defineProperty(res.Data, "name", {
+        let uploadTime = Date.parse(new Date()) / 1000;
+        Object.defineProperty(res.Data, "CreatedDate", {
+          value: uploadTime
+        });
+        Object.defineProperty(res.Data, "Introduction", {
+          value: 'upload vidoe test'
+        });
+        Object.defineProperty(res.Data, "FileName", {
           value: file.name
         });
-        this.imageList.item.push(res.Data);
+        this.videoList.List.unshift(res.Data);
       }
     },
     beforeAvatarUpload(file) {
-      const isJPG =
-        file.type === "image/jpeg" ||
-        file.type === "image/png" ||
-        file.type === "image/jpg" ||
-        file.type === "image/gif" ||
-        file.type === "image/bmp";
-      const isLt2M = file.size / 1024 / 1024 < 2;
+      const isMP4 = file.type === "video/mp4";
+      const isLt10M = file.size / 1024 / 1024 < 10;
 
-      if (!isJPG) {
-        this.$message.error("上传图片只能是 bmp/png/jpeg/jpg/gif 格式!");
+      if (!isMP4) {
+        this.$message.error("上传视频只能是 MP4 格式!");
       }
-      if (!isLt2M) {
-        this.$message.error("上传图片大小不能超过 2MB!");
+      if (!isLt10M) {
+        this.$message.error("上传图片大小不能超过 10MB!");
       }
-      return isJPG && isLt2M;
+      return isMP4 && isLt10M;
     },
-    async getImageList() {
+    async getVideoList() {
       try {
         let postData = new FormData();
-        postData.append("Act", "Material_GetMaterialList");
+        postData.append("Act", "Material_GetList");
         postData.append("Param", JSON.stringify(this.pageParam));
         postData.append("Verification", this.upLoadVideoData.Verification);
-        let response = await getMaterialList(postData);
+        let response = await postActionHandler(postData);
+        console.log(response);
         if (response.Result) {
-          this.imageList = response.Data;
+          this.videoList = response.Data;
         } else {
-          console.log(response);
           this.$message({
             type: "error",
             message: response.Msg
@@ -167,6 +152,50 @@ export default {
         this.$message({
           type: "error",
           message: error
+        });
+      }
+    },
+    deleteVideo(index, ID) {
+      this.$confirm("此操作将永久删除该视频, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          console.log(index, ID);
+          let postData = new FormData();
+          postData.append("Act", "Material_Del");
+          postData.append("Verification", this.upLoadVideoData.Verification);
+          postData.append(
+            "Param",
+            JSON.stringify({
+              ID: Number(ID)
+            })
+          );
+          this.deleteVideoById(index,postData);
+        })
+        .catch(() => {});
+    },
+    async deleteVideoById(index,postData) {
+      try {
+        let res = await postActionHandler(postData);
+        console.log(res);
+        if (res.Result) {
+          this.$message({
+            type: "success",
+            message: "删除成功!"
+          });
+          this.videoList.List.splice(index, 1);
+        } else {
+          this.$message({
+            type: "error",
+            message: "删除失败!" + res.Msg
+          });
+        }
+      } catch (error) {
+        this.$message({
+          type: "error",
+          message: "删除错误!" + error
         });
       }
     }
@@ -190,5 +219,10 @@ export default {
 .video-img {
   width: 160px;
   height: 90px;
+}
+.tips {
+  font-size: 14px;
+  text-align: right;
+  padding-right: 1%;
 }
 </style>

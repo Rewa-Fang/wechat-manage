@@ -1,19 +1,27 @@
 <template>
   <div class="media-list">
     <el-row class="imgae-top">
-      <el-col :span="14">
-        <div class="image-count">图片(共{{ imageList.total_count }}条)</div>
+      <el-col :span="12">
+        <div class="image-count">图片(共{{ imageList.TotalCount }}条)</div>
       </el-col>
       <el-col :span="8" class="tips">
-        <span>大小不超过5M，已关闭图片水印 </span>
+        <span>大小不超过2M，已关闭图片水印 </span>
         <el-tooltip effect="dark" content="不添加水印" placement="top-start">
           <i class="el-icon-warning"></i>
         </el-tooltip>
       </el-col>
-      <el-col :span="2" class="upload-btn">
-        <el-upload :action="upLoadImgUrl" :data="upLoadImgData" :show-file-list="false" :on-success="upLoadSuccess" :before-upload="beforeAvatarUpload">
-          <el-button size="default" type="primary">上传图片</el-button>
-        </el-upload>
+      <el-col :span="4" class="upload-btn">
+        <el-row>
+          <el-col :span="12">
+            <el-upload :action="upLoadImgUrl" :data="upLoadImgData" :show-file-list="false" :on-success="upLoadSuccess" :before-upload="beforeAvatarUpload">
+              <el-button size="default" type="primary">上传图片</el-button>
+            </el-upload>
+          </el-col>
+          <el-col :span="12">
+            <el-button size="default" type="success">同步图片</el-button>
+          </el-col>
+        </el-row>
+
       </el-col>
     </el-row>
     <!-- <div>分组标签</div> -->
@@ -30,14 +38,14 @@
       </el-col>
     </el-row>
     <el-row class="img-list">
-      <el-col :lg="4" :md="6" :sm="8" class="card-item" v-for="(item,index) in imageList.item" :key="item.media_id">
+      <el-col :lg="4" :md="6" :sm="8" class="card-item" v-for="(item,index) in imageList.List" :key="item.ID">
         <div class="item-img" :class="{'item-img-bg':checkedStyleArr[index]}">
-          <img :src="item.url" alt="">
+          <img :src="baseImgPath+imageList.Path+'/'+item.FileRealName" alt="">
         </div>
-        <div class="card-title">{{ item.name }}</div>
+        <div class="card-title">{{ item.FileName }}</div>
         <div class="chckedBox-menu" :class="{'chckedBox-menu-block':checkedStyleArr[index]}">
-          <input class="del-checkbox" type="checkbox" :id="item.media_id" :value="item.media_id" v-model="checkedImageArr" @change="changeChecked(index)">
-          <label :for="item.media_id"></label>
+          <input class="del-checkbox" type="checkbox" :id="item.ID" :value="item.ID" v-model="checkedImageArr" @change="changeChecked(index)">
+          <label :for="item.ID"></label>
         </div>
       </el-col>
     </el-row>
@@ -45,10 +53,13 @@
 </template>
 
 <script>
-import { getMaterialList, deleteMateria } from "@/api/getData";
+import { postActionHandler } from "@/api/getData";
+import { baseImgPath, baseUrl } from "@/config/env";
 export default {
   data() {
     return {
+      baseImgPath,
+      baseUrl,
       userInfo: {},
       imageList: {
         total_count: 5,
@@ -126,17 +137,18 @@ export default {
           }
         ]
       },
-      upLoadImgUrl: "http://wechat.a2designing.cn/Handlers/ActionHandler.ashx",
+      upLoadImgUrl: baseUrl + "/ActionHandler.ashx",
       upLoadImgData: {
         Act: "Material_Add",
-        Param: "{'type':'image'}",
+        Param:
+          "{'Type':1, 'Title': 'image upload', 'Introduction': 'image upload'}",
         Verification: ""
       },
       // 设置获取列表的素材类型及分页设置
       pageParam: {
-        type: "image",
-        offset: 0,
-        count: 20
+        Type: 1,
+        PageSize: 0,
+        PageNumber: 12
       },
       isAllChecked: false,
       delBtnDisabled: true,
@@ -171,10 +183,12 @@ export default {
   methods: {
     upLoadSuccess(res, file) {
       if (res.Result) {
-        Object.defineProperty(res.Data, "name", {
+        Object.defineProperty(res.Data, "FileName", {
           value: file.name
         });
-        this.imageList.item.unshift(res.Data);
+        this.imageList.List.unshift(res.Data);
+      } else {
+        this.$message.error("上传失败，请稍后重试!");
       }
     },
     beforeAvatarUpload(file) {
@@ -197,11 +211,12 @@ export default {
     async getImageList() {
       try {
         let postData = new FormData();
-        postData.append("Act", "Material_GetMaterialList");
+        postData.append("Act", "Material_GetList");
         postData.append("Param", JSON.stringify(this.pageParam));
         postData.append("Verification", this.upLoadImgData.Verification);
-        let response = await getMaterialList(postData);
+        let response = await postActionHandler(postData);
         if (response.Result) {
+          console.log(response);
           this.imageList = response.Data;
         } else {
           console.log(response);
@@ -209,7 +224,7 @@ export default {
             type: "error",
             message: response.Msg
           });
-          if (response.Code == "User000012") {
+          if (response.Code == "User000012" || response.Code == "User000014") {
             localStorage.removeItem("adminInfo");
             this.$router.push("/");
           }
@@ -222,7 +237,7 @@ export default {
         });
       }
     },
-    deleteImg(media_id) {
+    deleteImg() {
       this.$confirm("此操作将永久删除该图片, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -237,12 +252,12 @@ export default {
               postData.append(
                 "Param",
                 JSON.stringify({
-                  media_id: img
+                  ID: Number(img)
                 })
               );
               console.log(postData);
 
-              this.deleteImgByMediaId(postData);
+              this.deleteImgById(postData);
             });
           } else {
             this.$message({
@@ -258,15 +273,20 @@ export default {
           // });
         });
     },
-    async deleteImgByMediaId(postData) {
+    async deleteImgById(postData) {
       console.log(postData);
       try {
-        let res = await deleteMateria(postData);
+        let res = await postActionHandler(postData);
         console.log(res);
         if (res.Result) {
           this.$message({
             type: "success",
             message: "删除成功!"
+          });
+          this.imageList.List.forEach((img, index) => {
+            if (this.checkedImageArr.includes(img.ID)) {
+              this.imageList.List.splice(index, 1);
+            }
           });
         } else {
           this.$message({
@@ -286,8 +306,8 @@ export default {
     },
     allChecked() {
       if (this.isAllChecked) {
-        this.imageList.item.forEach((img, index) => {
-          this.checkedImageArr[index] = img.media_id;
+        this.imageList.List.forEach((img, index) => {
+          this.checkedImageArr[index] = img.ID;
         });
         this.checkedImageArr = [...this.checkedImageArr];
         this.checkedStyleArr = this.checkedImageArr;

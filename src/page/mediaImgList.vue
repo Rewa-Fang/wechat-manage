@@ -13,12 +13,12 @@
       <el-col :span="4" class="upload-btn">
         <el-row>
           <el-col :span="12">
-            <el-upload :action="upLoadImgUrl" :data="upLoadImgData" :show-file-list="false" :on-success="upLoadSuccess" :before-upload="beforeAvatarUpload">
-              <el-button size="default" type="primary">上传图片</el-button>
+            <el-upload :action="upLoadImgUrl" :data="upLoadImgData" :show-file-list="false" :on-success="upLoadSuccess" :before-upload="beforeAvatarUpload" :on-progress="uploadProgress">
+              <el-button size="default" type="primary" :loading="btnLoading">上传图片</el-button>
             </el-upload>
           </el-col>
           <el-col :span="12">
-            <el-button size="default" type="success">同步图片</el-button>
+            <el-button size="default" type="success" @click="syncImage" :loading="btnLoading">同步图片</el-button>
           </el-col>
         </el-row>
 
@@ -49,93 +49,29 @@
         </div>
       </el-col>
     </el-row>
+    <my-pagination :pagiConfig="pagiConfig" @changePage="changePage"></my-pagination>
   </div>
 </template>
 
 <script>
 import { postActionHandler } from "@/api/getData";
+import synchronize from "@/api/synchronize";
 import { baseImgPath, baseUrl } from "@/config/env";
+import pagination from "@/components/pagination";
 export default {
+  components: {
+    myPagination: pagination
+  },
   data() {
     return {
       baseImgPath,
       baseUrl,
       userInfo: {},
-      imageList: {
-        total_count: 5,
-        item_count: 5,
-        item: [
-          {
-            media_id: "yzait9Fj4D9uLQ-3yewqKdsLt85FO_Vp3KkKXGHOjXw",
-            name: "abc.jpg",
-            update_time: 1533705479,
-            url:
-              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqibKwggAsETNN6qVmVA5xH03YXMUIz6CyTUQQghyGpicFxMNRlDkNJzvEw/0?wx_fmt=jpeg"
-          },
-          {
-            media_id: "yzait9Fj4D9uLQ-3yewqKTPxz91gfesBgmiq8FJklQU",
-            name: "hope.jpg",
-            update_time: 1533703436,
-            url:
-              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqib0UpwInVlZCIsX9WZgvQq0ia4fXMGR2zlD1mKY1yqva30Kz9h11icIgxg/0?wx_fmt=jpeg"
-          },
-          {
-            media_id: "yzait9Fj4D9uLQ-3yewqKYqD3l0qE3oZPpHNZ0qg68U",
-            name: "abc.jpg",
-            update_time: 1533702040,
-            url:
-              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqibKwggAsETNN6qVmVA5xH03YXMUIz6CyTUQQghyGpicFxMNRlDkNJzvEw/0?wx_fmt=jpeg"
-          },
-          {
-            media_id: "yzait9Fj4D9uLQ-3yewqKSaDltyxyfvM5JFV8xgKLm0",
-            name: "abc.jpg",
-            update_time: 1533697754,
-            url:
-              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqibKwggAsETNN6qVmVA5xH03YXMUIz6CyTUQQghyGpicFxMNRlDkNJzvEw/0?wx_fmt=jpeg"
-          },
-          {
-            media_id: "yzait9Fj4D9uLQ-3yewqKRPtLeyRRCXcaTjbmzdursw",
-            name: "abc.jpg",
-            update_time: 1533697733,
-            url:
-              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqibKwggAsETNN6qVmVA5xH03YXMUIz6CyTUQQghyGpicFxMNRlDkNJzvEw/0?wx_fmt=jpeg"
-          },
-          {
-            media_id: "yzait9Fj4D9uLQ-3yewqKSp9nrV1zRnda-wWpS8WacY",
-            name: "0.jpg",
-            update_time: 1533696001,
-            url:
-              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqib7jvoAzeJRnxy8OSVPciaJEXtsNfZlne0Sloge2GAF5t8cnZyZ42MorQ/0?wx_fmt=jpeg"
-          },
-          {
-            media_id: "yzait9Fj4D9uLQ-3yewqKc8Ww3-WMiROHNkj0XPH0gI",
-            name: "89802Gibbon_monkey_dog_tail.gif",
-            update_time: 1533695103,
-            url:
-              "http://mmbiz.qpic.cn/mmbiz_gif/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqibHWAkJkQx0zGafbVQzkyT1icScTaAWsl56GicnHE7RF780FXjSH5rZwVQ/0?wx_fmt=gif"
-          },
-          {
-            media_id: "yzait9Fj4D9uLQ-3yewqKTUFkNk9JRZWsdg7VfJ0nHQ",
-            name: "0.jpg",
-            update_time: 1533695051,
-            url:
-              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqib7jvoAzeJRnxy8OSVPciaJEXtsNfZlne0Sloge2GAF5t8cnZyZ42MorQ/0?wx_fmt=jpeg"
-          },
-          {
-            media_id: "yzait9Fj4D9uLQ-3yewqKQn_0ukmWIs5sBfrkQOx7KQ",
-            name: "abc.jpg",
-            update_time: 1533694987,
-            url:
-              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3Npxf2NMHdEW56ZWWBZXIeqibKwggAsETNN6qVmVA5xH03YXMUIz6CyTUQQghyGpicFxMNRlDkNJzvEw/0?wx_fmt=jpeg"
-          },
-          {
-            media_id: "yzait9Fj4D9uLQ-3yewqKdkAl5-8Vjp1OKx8ZCF5w6U",
-            name: "20180807125639F4L4X04F.jpg",
-            update_time: 1533617802,
-            url:
-              "http://mmbiz.qpic.cn/mmbiz_jpg/xST3KOBs3NrjdZZsouibbq8k0gP17AUHzicGqruEbUvDuSwFYaS0HCtxyCDRBkg6Fric2SAHZMuVtpicztnXRYYv8A/0?wx_fmt=jpeg"
-          }
-        ]
+      imageList: {},
+      pagiConfig: {
+        pageSize: 15,
+        pagerCount: 7,
+        total: 1000
       },
       upLoadImgUrl: baseUrl + "/ActionHandler.ashx",
       upLoadImgData: {
@@ -147,13 +83,14 @@ export default {
       // 设置获取列表的素材类型及分页设置
       pageParam: {
         Type: 1,
-        PageSize: 0,
-        PageNumber: 12
+        PageSize: 15,
+        PageNumber: 1
       },
       isAllChecked: false,
       delBtnDisabled: true,
       checkedStyleArr: [],
-      checkedImageArr: []
+      checkedImageArr: [],
+      btnLoading: false
     };
   },
   watch: {
@@ -175,12 +112,16 @@ export default {
         Token: this.userInfo.Token
       });
       this.getImageList();
+      this.getCount();
     } else {
       this.$router.push("/login");
     }
   },
   computed: {},
   methods: {
+    changePage(currentPage) {
+      console.log(currentPage);
+    },
     upLoadSuccess(res, file) {
       if (res.Result) {
         Object.defineProperty(res.Data, "FileName", {
@@ -190,6 +131,7 @@ export default {
       } else {
         this.$message.error("上传失败，请稍后重试!");
       }
+      this.btnLoading = false;
     },
     beforeAvatarUpload(file) {
       const isJPG =
@@ -218,6 +160,7 @@ export default {
         if (response.Result) {
           console.log(response);
           this.imageList = response.Data;
+          // this.imageList.List.reverse();
         } else {
           console.log(response);
           this.$message({
@@ -317,6 +260,44 @@ export default {
         this.checkedStyleArr = [];
         this.checkedImageArr = [];
         // this.delBtnDisabled = true;
+      }
+    },
+    async syncImage() {
+      this.btnLoading = true;
+      try {
+        let response = await synchronize(
+          this.upLoadImgData.Verification,
+          this.pageParam.Type
+        );
+        console.log(response);
+        if (response.Result) {
+          console.log("########OK#########");
+        } else {
+          console.log("########OK#########");
+        }
+        this.getImageList();
+        this.btnLoading = false;
+      } catch (error) {
+        console.log("########error#########" + error);
+        this.btnLoading = false;
+      }
+    },
+    uploadProgress() {
+      this.btnLoading = true;
+    },
+    async getCount() {
+      try {
+        let postData = new FormData();
+        postData.append("Act", "Material_GetCountWX");
+        postData.append("Param", "{}");
+        postData.append("Verification", this.upLoadImgData.Verification);
+        let response = await postActionHandler(postData);
+        if(response.Result){
+          this.pagiConfig.total = this.imageList.TotalCount;
+          console.log(response)
+        }
+      } catch (error) {
+
       }
     }
   }

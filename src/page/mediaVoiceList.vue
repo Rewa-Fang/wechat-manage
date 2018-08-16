@@ -67,8 +67,8 @@ export default {
       // 设置获取列表的素材类型及分页设置
       pageParam: {
         Type: 2,
-        PageSize: 0,
-        PageNumber: 10
+        PageSize: 10,
+        PageNumber: 1
       },
       curPlayVoice: {},
       curPlayMediaId: ""

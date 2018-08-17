@@ -30,9 +30,9 @@
 </template>
 
 <script>
-import mediaImgList from "@/page/mediaImgList";
-import mediaVideoList from "@/page/mediaVideoList";
-import mediaVoiceList from "@/page/mediaVoiceList";
+import mediaImgList from "@/components/media/mediaImgList";
+import mediaVideoList from "@/components/media/mediaVideoList";
+import mediaVoiceList from "@/components/media/mediaVoiceList";
 import { mapActions, mapState, mapMutations } from "vuex";
 export default {
   data() {

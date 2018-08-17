@@ -1,31 +1,8 @@
 <template>
   <div class="media-list">
-    <el-row class="imgae-top">
-      <el-col :span="12">
-        <div class="image-count">图片(共{{ imageList.TotalCount }}条)</div>
-      </el-col>
-      <el-col :span="8" class="tips">
-        <span>大小不超过2M，已关闭图片水印 </span>
-        <el-tooltip effect="dark" content="不添加水印" placement="top-start">
-          <i class="el-icon-warning"></i>
-        </el-tooltip>
-      </el-col>
-      <el-col :span="4" class="upload-btn">
-        <el-row>
-          <el-col :span="12">
-            <el-upload :action="upLoadImgUrl" :data="upLoadImgData" :show-file-list="false" :on-success="upLoadSuccess" :before-upload="beforeAvatarUpload" :on-progress="uploadProgress">
-              <el-button size="default" type="primary" :loading="btnLoading">上传图片</el-button>
-            </el-upload>
-          </el-col>
-          <el-col :span="12">
-            <el-button size="default" type="success" @click="syncImage" :loading="btnLoading">同步图片</el-button>
-          </el-col>
-        </el-row>
-
-      </el-col>
-    </el-row>
+    <media-header :mediaConfig="mediaConfig" @uploadSuccess="uploadSuccess" @syncSuccess="syncSuccess"></media-header>
     <!-- <div>分组标签</div> -->
-    <el-row class="delete-row">
+    <el-row class="delete-row" v-show="!delBtnDisabled">
       <el-col :span="12" class="del-row-left">
         <div>
           <input class="del-checkbox" type="checkbox" id="all-checked" v-model="isAllChecked" @change="allChecked">
@@ -49,42 +26,43 @@
         </div>
       </el-col>
     </el-row>
-    <my-pagination :pagiConfig="pagiConfig" @changePage="changePage"></my-pagination>
+
+    <div class="data-null" v-if="mediaConfig.totalCount <= 0">
+      <i class="el-icon-warning"></i>本地没有图片素材，您可以添加或同步素材
+    </div>
+    <my-pagination :pagiConfig="mediaConfig" @changePage="changePage" v-if="mediaConfig.totalCount > 0"></my-pagination>
   </div>
 </template>
 
 <script>
 import { postActionHandler } from "@/api/getData";
-import synchronize from "@/api/synchronize";
-import { baseImgPath, baseUrl } from "@/config/env";
-import pagination from "@/components/pagination";
+import { baseImgPath } from "@/config/env";
+import pagination from "./pagination";
+import header from "./header";
 export default {
   components: {
-    myPagination: pagination
+    myPagination: pagination,
+    mediaHeader: header
   },
   data() {
     return {
-      baseImgPath,
-      baseUrl,
-      userInfo: {},
-      imageList: {},
-      pagiConfig: {
+      mediaConfig: {
+        type: 1,
         pageSize: 15,
         pagerCount: 7,
-        total: 1000
+        verification: "",
+        totalCount: 0, // 本地服务器素材总数
+        wxTotalCount: 0 // 微信服务器素材总数
       },
-      upLoadImgUrl: baseUrl + "/ActionHandler.ashx",
-      upLoadImgData: {
-        Act: "Material_Add",
-        Param:
-          "{'Type':1, 'Title': 'image upload', 'Introduction': 'image upload'}",
-        Verification: ""
-      },
+      baseImgPath,
+      userInfo: {},
+      imageList: {},
+      Verification: "",
       // 设置获取列表的素材类型及分页设置
       pageParam: {
         Type: 1,
         PageSize: 15,
-        PageNumber: 1
+        PageNumber: 0
       },
       isAllChecked: false,
       delBtnDisabled: true,
@@ -95,7 +73,6 @@ export default {
   },
   watch: {
     checkedImageArr(val) {
-      // this.delBtnDisabled = val.length > 0 ? false : true;
       if (val.length > 0) {
         this.delBtnDisabled = false;
       } else {
@@ -107,7 +84,7 @@ export default {
   created() {
     if (localStorage.adminInfo) {
       this.userInfo = JSON.parse(localStorage.adminInfo);
-      this.upLoadImgData.Verification = JSON.stringify({
+      this.mediaConfig.verification = JSON.stringify({
         UserID: this.userInfo.ID,
         Token: this.userInfo.Token
       });
@@ -121,46 +98,21 @@ export default {
   methods: {
     changePage(currentPage) {
       console.log(currentPage);
-    },
-    upLoadSuccess(res, file) {
-      if (res.Result) {
-        Object.defineProperty(res.Data, "FileName", {
-          value: file.name
-        });
-        this.imageList.List.unshift(res.Data);
-      } else {
-        this.$message.error("上传失败，请稍后重试!");
-      }
-      this.btnLoading = false;
-    },
-    beforeAvatarUpload(file) {
-      const isJPG =
-        file.type === "image/jpeg" ||
-        file.type === "image/png" ||
-        file.type === "image/jpg" ||
-        file.type === "image/gif" ||
-        file.type === "image/bmp";
-      const isLt2M = file.size / 1024 / 1024 < 2;
-
-      if (!isJPG) {
-        this.$message.error("上传图片只能是 bmp/png/jpeg/jpg/gif 格式!");
-      }
-      if (!isLt2M) {
-        this.$message.error("上传图片大小不能超过 2MB!");
-      }
-      return isJPG && isLt2M;
+      this.pageParam.PageNumber = currentPage;
+      this.getImageList();
     },
     async getImageList() {
       try {
         let postData = new FormData();
         postData.append("Act", "Material_GetList");
         postData.append("Param", JSON.stringify(this.pageParam));
-        postData.append("Verification", this.upLoadImgData.Verification);
+        postData.append("Verification", this.mediaConfig.verification);
         let response = await postActionHandler(postData);
         if (response.Result) {
           console.log(response);
           this.imageList = response.Data;
-          // this.imageList.List.reverse();
+          this.imageList.List.reverse();
+          this.mediaConfig.totalCount = response.Data.TotalCount;
         } else {
           console.log(response);
           this.$message({
@@ -191,15 +143,14 @@ export default {
             this.checkedImageArr.forEach(img => {
               let postData = new FormData();
               postData.append("Act", "Material_Del");
-              postData.append("Verification", this.upLoadImgData.Verification);
+              postData.append("Verification", this.mediaConfig.verification);
               postData.append(
                 "Param",
                 JSON.stringify({
-                  ID: Number(img)
+                  ID: Number(img),
+                  OnlyLocal: true
                 })
               );
-              console.log(postData);
-
               this.deleteImgById(postData);
             });
           } else {
@@ -229,6 +180,11 @@ export default {
           this.imageList.List.forEach((img, index) => {
             if (this.checkedImageArr.includes(img.ID)) {
               this.imageList.List.splice(index, 1);
+              this.checkedImageArr.splice(
+                this.checkedImageArr.indexOf(img.ID),
+                1
+              );
+              this.mediaConfig.totalCount--;
             }
           });
         } else {
@@ -262,43 +218,29 @@ export default {
         // this.delBtnDisabled = true;
       }
     },
-    async syncImage() {
-      this.btnLoading = true;
-      try {
-        let response = await synchronize(
-          this.upLoadImgData.Verification,
-          this.pageParam.Type
-        );
-        console.log(response);
-        if (response.Result) {
-          console.log("########OK#########");
-        } else {
-          console.log("########OK#########");
-        }
+    syncSuccess(response) {
+      if(response){
         this.getImageList();
-        this.btnLoading = false;
-      } catch (error) {
-        console.log("########error#########" + error);
-        this.btnLoading = false;
+        this.getCount();
       }
-    },
-    uploadProgress() {
-      this.btnLoading = true;
     },
     async getCount() {
       try {
         let postData = new FormData();
         postData.append("Act", "Material_GetCountWX");
         postData.append("Param", "{}");
-        postData.append("Verification", this.upLoadImgData.Verification);
+        postData.append("Verification", this.mediaConfig.verification);
         let response = await postActionHandler(postData);
-        if(response.Result){
-          this.pagiConfig.total = this.imageList.TotalCount;
-          console.log(response)
+        if (response.Result) {
+          this.mediaConfig.wxTotalCount = response.Data.image_count;
         }
       } catch (error) {
-
+        console.log(error);
       }
+    },
+    uploadSuccess(data) {
+      this.imageList.List.unshift(data);
+      this.mediaConfig.totalCount++;
     }
   }
 };
@@ -308,23 +250,12 @@ export default {
 .media-list {
   padding: 2%;
 }
-.imgae-top {
-  line-height: 36px;
-  padding: 2% 0;
-}
 .img-list {
   padding: 2% 0;
 }
-.tips {
-  font-size: 14px;
-  text-align: right;
-  padding-right: 1%;
-}
-.image-count {
-  font-size: 20px;
-}
-.upload-btn {
-  text-align: right;
+.data-null {
+  text-align: center;
+  margin-top: 100px;
 }
 .card-item {
   position: relative;
@@ -370,11 +301,6 @@ export default {
 .chckedBox-menu-block {
   display: block;
 }
-/* .del-checkbox {
-  width: 10%;
-  height: 20px;
-  background-color: blue;
-} */
 .del-checkbox {
   display: none;
 }

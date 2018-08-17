@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-pagination background :page-size="pagiConfig.pageSize" :pager-count="pagiConfig.pagerCount" @current-change="handleCurrentChange" layout="prev, pager, next, jumper, total" :total="pagiConfig.total">
+    <el-pagination background :page-size="pagiConfig.pageSize" :pager-count="pagiConfig.pagerCount" @current-change="handleCurrentChange" layout="prev, pager, next, jumper, total" :total="pagiConfig.totalCount">
     </el-pagination>
   </div>
 </template>
@@ -22,6 +22,7 @@ export default {
   methods: {
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`);
+      this.$emit('changePage',val);
     }
   }
 };

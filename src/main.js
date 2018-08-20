@@ -5,10 +5,12 @@ import store from './store/'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-default/index.css'
 import 'babel-polyfill';
+import SyncProgress from '@/plugin/syncProgress/syncProgress.js'
 
 Vue.config.productionTip = false;
 
 Vue.use(ElementUI);
+Vue.use(SyncProgress);
 
 new Vue({
 	el: '#app',

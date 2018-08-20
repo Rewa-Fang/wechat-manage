@@ -5,7 +5,7 @@ let paramData = {
   Param: {
     "Type": 1,  // 同步的素材类型 1图片 2语音 3视频
     "Offset": 0, // 同步素材的起始位置
-    "Count": 2 // 单次同步素材的数量
+    "Count": 20 // 单次同步素材的数量
   },
   Verification: ''
 };
@@ -24,13 +24,14 @@ const postSync = async (time) => {
   }
 };
 export default async (mediaConfig) => {
+
   paramData.Param.Type = mediaConfig.type;
   paramData.Verification = mediaConfig.verification;
 
   let time = Math.ceil(mediaConfig.wxTotalCount / paramData.Param.Count);
   let responseArr = [];
 
-  for (let count = 0; count < 1; count++) {
+  for (let count = 0; count < 2; count++) {
     let resOnce = await postSync(count);
     responseArr.push(resOnce)
   }

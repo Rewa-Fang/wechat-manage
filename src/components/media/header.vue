@@ -117,6 +117,9 @@ export default {
       this.btnLoading = true;
     },
     async syncImage() {
+      this.$syncProgress.show('正在同步...');
+      // console.log(this.$syncProgress.);
+      
       this.btnLoading = true;
       try {
         let response = await synchronize(this.mediaConfig);

@@ -1,8 +1,13 @@
 <template>
   <div class="sync-progress" v-show="show">
-    <h1>{{ text }}</h1>
-    <div>{{ now }}/{{ total}}</div>
-    <!-- <button @click="close">X</button> -->
+    <div class="progress-box">
+      <div>{{ text }}</div>
+      <div class="progress-div">
+        <div class="progress-bar"></div>
+      </div>
+      <div>{{ now }}/{{ total}}</div>
+      <button class="close-btn" @click="close">取 消</button>
+    </div>
   </div>
 </template>
 
@@ -14,25 +19,34 @@ export default {
       type: String,
       default: "正在加载中..."
     },
-    now:{
-      type:Number,
-      default:1
+    now: {
+      type: Number,
+      default: 1
     },
-    total:{
-      type:Number,
-      default:1
+    total: {
+      type: Number,
+      default: 1
+    }
+  },
+  methods:{
+    close(){
+      this.show = false;
     }
   }
 };
 </script>
 
 <style scoped>
-.sync-progress{
+.sync-progress {
   position: fixed;
   top: 0;
+  bottom: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
   text-align: center;
+  background-color:rgba(0, 0, 0, .5);
+}
+.progress-box {
+  
 }
 </style>

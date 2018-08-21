@@ -15,13 +15,17 @@ export default {
     $vm.show = false
 
     let syncprogress = {
-      show (text) {
+      show (data) {
         $vm.show = true
-
-        $vm.text = text
+        $vm.text = data.text;
+        $vm.now = data.now;
+        $vm.total = data.total;
       },
       hide () {
         $vm.show = false
+      },
+      progress(now){
+        $vm.now = now;
       }
     }
 

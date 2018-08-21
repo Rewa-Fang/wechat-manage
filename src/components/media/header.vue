@@ -117,9 +117,13 @@ export default {
       this.btnLoading = true;
     },
     async syncImage() {
-      this.$syncProgress.show('正在同步...');
+      this.$syncProgress.show({
+        text: "正在同步...",
+        now: 0,
+        total: 100
+      });
       // console.log(this.$syncProgress.);
-      
+      this.$syncProgress.progress(20);
       this.btnLoading = true;
       try {
         let response = await synchronize(this.mediaConfig);
@@ -134,6 +138,8 @@ export default {
         this.$message.error(`同步出错，${error}`);
         this.btnLoading = false;
       }
+
+      
     }
   }
 };

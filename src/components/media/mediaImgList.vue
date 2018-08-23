@@ -2,6 +2,7 @@
   <div class="media-list">
     <media-header :mediaConfig="mediaConfig" @uploadSuccess="uploadSuccess" @syncSuccess="syncSuccess"></media-header>
     <!-- <div>分组标签</div> -->
+    <!-- delete -->
     <el-row class="delete-row" v-show="!delBtnDisabled">
       <el-col :span="12" class="del-row-left">
         <div>
@@ -14,6 +15,7 @@
         <el-button type="danger" class="el-icon-delete" circle @click="deleteImg" :disabled="delBtnDisabled"></el-button>
       </el-col>
     </el-row>
+    <!-- image list -->
     <el-row class="img-list">
       <el-col :lg="4" :md="6" :sm="8" class="card-item" v-for="(item,index) in imageList.List" :key="item.ID">
         <div class="item-img" :class="{'item-img-bg':checkedStyleArr[index]}">
@@ -26,10 +28,11 @@
         </div>
       </el-col>
     </el-row>
-
+    <!-- if image list is null -->
     <div class="data-null" v-if="mediaConfig.totalCount <= 0">
       <i class="el-icon-warning"></i>本地没有图片素材，您可以添加或同步素材
     </div>
+    <!-- pagination -->
     <my-pagination :pagiConfig="mediaConfig" @changePage="changePage" v-if="mediaConfig.totalCount > 0"></my-pagination>
   </div>
 </template>
@@ -111,7 +114,7 @@ export default {
         if (response.Result) {
           console.log(response);
           this.imageList = response.Data;
-          this.imageList.List.reverse();
+          // this.imageList.List.reverse();
           this.mediaConfig.totalCount = response.Data.TotalCount;
         } else {
           console.log(response);

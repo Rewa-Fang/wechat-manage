@@ -18,16 +18,16 @@ const mutations = {
 
 const actions = {
 	async getAdminData({commit}){
-		try{
-			const res = await getAdminInfo()
-			if (res.status == 1) {
-				commit('saveAdminInfo', res.data);
-			}else{
-				throw new Error(res)
-			}
-		}catch(err){
-			console.log('您尚未登陆或者session失效')
-		}
+		// try{
+		// 	const res = await getAdminInfo()
+		// 	if (res.status == 1) {
+		// 		commit('saveAdminInfo', res.data);
+		// 	}else{
+		// 		throw new Error(res)
+		// 	}
+		// }catch(err){
+		// 	console.log('您尚未登陆或者session失效')
+		// }
 	}
 }
 

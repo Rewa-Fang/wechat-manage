@@ -26,6 +26,12 @@ export default {
       },
       progress(now){
         $vm.now = now;
+      },
+      progNum(progWidth){
+        $vm.progWidth = progWidth;
+      },
+      cancel(){
+        return $vm.show;
       }
     }
 

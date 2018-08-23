@@ -1,18 +1,6 @@
 <template>
   <div>
-    <el-row class="imgae-top">
-      <el-col :span="6">
-        <div class="image-count">语音(共{{ voiceList.TotalCount }}条)</div>
-      </el-col>
-      <el-col :span="14" class="tips">
-        <span>格式支持mp3、wma、wav、amr，文件大小不超过2M，语音时长不超过60秒</span>
-      </el-col>
-      <el-col :span="4" class="upload-btn">
-        <el-upload class="upload-demo" :action="upLoadUrl" :data="upLoadData" :show-file-list="false" :on-success="upLoadSuccess" :before-upload="beforeAvatarUpload">
-          <el-button size="default" type="primary">添加语音</el-button>
-        </el-upload>
-      </el-col>
-    </el-row>
+    <media-header :mediaConfig="mediaConfig" @uploadSuccess="uploadSuccess" @syncSuccess="syncSuccess"></media-header>
     <!-- <div>分组标签</div> -->
     <el-row class="img-list">
       <el-table :data="voiceList.List" style="width: 100%" :row-style="rowStyle">
@@ -45,9 +33,23 @@
 <script>
 import { postActionHandler } from "@/api/getData";
 import { baseImgPath, baseUrl } from "@/config/env";
+import pagination from "./pagination";
+import header from "./header";
 export default {
+  components: {
+    myPagination: pagination,
+    mediaHeader: header
+  },
   data() {
     return {
+      mediaConfig: {
+        type: 2,
+        pageSize: 10,
+        pagerCount: 7,
+        verification: "",
+        totalCount: 0, // 本地服务器素材总数
+        wxTotalCount: 0 // 微信服务器素材总数
+      },
       voiceIcon: require("@/assets/img/voice.png"),
       baseImgPath,
       baseUrl,
@@ -77,11 +79,12 @@ export default {
   created() {
     if (localStorage.adminInfo) {
       this.userInfo = JSON.parse(localStorage.adminInfo);
-      this.upLoadData.Verification = JSON.stringify({
+      this.mediaConfig.verification = JSON.stringify({
         UserID: this.userInfo.ID,
         Token: this.userInfo.Token
       });
       this.getVoiceList();
+      this.getCount();
     } else {
       this.$router.push("/login");
     }
@@ -101,7 +104,27 @@ export default {
     }
   },
   methods: {
-    upLoadSuccess(res, file) {
+    syncSuccess(response) {
+      if(response){
+        this.getVoiceList();
+        this.getCount();
+      }
+    },
+    async getCount() {
+      try {
+        let postData = new FormData();
+        postData.append("Act", "Material_GetCountWX");
+        postData.append("Param", "{}");
+        postData.append("Verification", this.mediaConfig.verification);
+        let response = await postActionHandler(postData);
+        if (response.Result) {
+          this.mediaConfig.wxTotalCount = response.Data.voice_count;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    uploadSuccess(data) {
       if (res.Result) {
         let uploadTime = Date.parse(new Date()) / 1000;
         Object.defineProperty(res.Data, "CreatedDate", {
@@ -135,12 +158,14 @@ export default {
         let postData = new FormData();
         postData.append("Act", "Material_GetList");
         postData.append("Param", JSON.stringify(this.pageParam));
-        postData.append("Verification", this.upLoadData.Verification);
+        postData.append("Verification", this.mediaConfig.verification);
         let response = await postActionHandler(postData);
-        console.log(response);
         if (response.Result) {
+          console.log(response);
           this.voiceList = response.Data;
+          this.mediaConfig.totalCount = response.Data.TotalCount;
         } else {
+          console.log(response);
           this.$message({
             type: "error",
             message: response.Msg

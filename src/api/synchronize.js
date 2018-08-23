@@ -9,6 +9,7 @@ let paramData = {
   },
   Verification: ''
 };
+
 const postSync = async (time) => {
   paramData.Param.Offset = time * paramData.Param.Count;
   try {
@@ -18,24 +19,38 @@ const postSync = async (time) => {
     postData.append("Verification", paramData.Verification);
     let response = await postActionHandler(postData);
     console.log(response);
+
     return response;
   } catch (error) {
     return error;
   }
 };
-export default async (mediaConfig) => {
-
+export default async (mediaConfig, vueObject) => {
+  let syncCountNum = 0;
   paramData.Param.Type = mediaConfig.type;
   paramData.Verification = mediaConfig.verification;
-
   let time = Math.ceil(mediaConfig.wxTotalCount / paramData.Param.Count);
   let responseArr = [];
+  vueObject.$syncProgress.show({
+    text: "正在同步...",
+    now: 0,
+    total: 200
+  });
 
-  for (let count = 0; count < 2; count++) {
-    let resOnce = await postSync(count);
-    responseArr.push(resOnce)
+  for (let count = 0; count < 10; count++) {
+    if (vueObject.$syncProgress.cancel()) {
+      let resOnce = await postSync(count);
+      syncCountNum = syncCountNum + resOnce.Data.ItemCount;
+      console.log(syncCountNum);
+      vueObject.$syncProgress.progress(syncCountNum);
+      responseArr.push(resOnce)
+    } else {
+      break;
+    }
   }
-
   console.log(responseArr);
+  setTimeout(() => {
+    // vueObject.$syncProgress.hide();
+  }, 500);
   return responseArr;
 };

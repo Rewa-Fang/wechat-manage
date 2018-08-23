@@ -1,16 +1,16 @@
 <template>
   <div>
     <el-row class="imgae-top">
-      <el-col :span="12">
+      <el-col :xs="6" :sm="6" :md="4" :lg="8" :xl="12">
         <div class="image-count">{{ mediaType }}(共{{ mediaConfig.totalCount }}条)</div>
       </el-col>
-      <el-col :span="8" class="tips">
+      <el-col :xs="10" :sm="10" :md="12" :lg="11" :xl="8" class="tips">
         <span>{{ tipsText }} </span>
         <el-tooltip effect="dark" content="不添加水印" placement="top-start" v-if="mediaConfig.type==1">
           <i class="el-icon-warning"></i>
         </el-tooltip>
       </el-col>
-      <el-col :span="4" class="upload-btn">
+      <el-col :xs="8" :sm="8" :md="8" :lg="5" :xl="4" class="upload-btn">
         <el-row>
           <el-col :span="12">
             <el-upload :action="upLoadUrl" :data="upLoadData" :show-file-list="false" :on-success="upLoadSuccess" :before-upload="beforeAvatarUpload" :on-progress="uploadProgress">
@@ -45,8 +45,8 @@ export default {
         Act: "Material_Add",
         Param: {
           Type: 1,
-          Title: "image upload",
-          Introduction: "image upload"
+          Title: "test upload",
+          Introduction: "test upload"
         },
         Verification: ""
       },
@@ -65,7 +65,7 @@ export default {
         case 2:
           this.mediaType = "语音";
           this.tipsText =
-            "格式支持mp3、wma、wav、amr，文件大小不超过2M，语音时长不超过60秒";
+            "支持mp3/wma/wav/amr，大小不超过2M，时长不超过60秒";
           break;
         case 3:
           this.mediaType = "视频";
@@ -116,30 +116,37 @@ export default {
     uploadProgress() {
       this.btnLoading = true;
     },
-    async syncImage() {
-      this.$syncProgress.show({
-        text: "正在同步...",
-        now: 0,
-        total: 100
-      });
-      // console.log(this.$syncProgress.);
-      this.$syncProgress.progress(20);
-      this.btnLoading = true;
-      try {
-        let response = await synchronize(this.mediaConfig);
-        if (response) {
-          this.$message.success("同步成功");
-        } else {
-          this.$message.error(`同步失败，${response.Msg}`);
+    syncImage() {
+      //wxTotalCount
+      this.$confirm(
+        `此操作将同步${this.mediaConfig.wxTotalCount}张图片, 是否继续?`,
+        "提示",
+        {
+          confirmButtonText: "同步",
+          cancelButtonText: "取消",
+          type: "warning"
         }
-        this.$emit("syncSuccess", response);
-        this.btnLoading = false;
-      } catch (error) {
-        this.$message.error(`同步出错，${error}`);
-        this.btnLoading = false;
-      }
-
-      
+      )
+        .then(async () => {
+          try {
+            this.btnLoading = true;
+            let response = await synchronize(this.mediaConfig, this);
+            if (response) {
+              // this.$message.success("同步成功");
+            } else {
+              this.$message.error(`同步失败，${response.Msg}`);
+            }
+            this.$emit("syncSuccess", response);
+            this.btnLoading = false;
+          } catch (error) {
+            console.log(error);
+            this.$message.error(`同步出错，${error}`);
+            this.btnLoading = false;
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
   }
 };

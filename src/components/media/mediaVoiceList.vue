@@ -1,8 +1,10 @@
 <template>
   <div>
+    <!-- header add button, synchronize button -->
     <media-header :mediaConfig="mediaConfig" @uploadSuccess="uploadSuccess" @syncSuccess="syncSuccess"></media-header>
     <!-- <div>分组标签</div> -->
-    <el-row class="img-list">
+    <!-- voice list -->
+    <el-row class="img-list media-list2">
       <el-table :data="voiceList.List" style="width: 100%" :row-style="rowStyle">
         <el-table-column label="名称">
           <template slot-scope="scope">
@@ -27,12 +29,14 @@
         </el-table-column>
       </el-table>
     </el-row>
+    <!-- pagination components -->
+    <my-pagination :pagiConfig="mediaConfig" @changePage="changePage" v-if="mediaConfig.totalCount > 0"></my-pagination>
   </div>
 </template>
 
 <script>
 import { postActionHandler } from "@/api/getData";
-import { baseImgPath, baseUrl } from "@/config/env";
+import { baseImgPath } from "@/config/env";
 import pagination from "./pagination";
 import header from "./header";
 export default {
@@ -52,19 +56,11 @@ export default {
       },
       voiceIcon: require("@/assets/img/voice.png"),
       baseImgPath,
-      baseUrl,
       userInfo: {},
       rowStyle: {
         height: "80px"
       },
       voiceList: {},
-      upLoadUrl: baseUrl + "/ActionHandler.ashx",
-      upLoadData: {
-        Act: "Material_Add",
-        Param:
-          "{'Type':2, 'Title': 'voice upload', 'Introduction': 'voice upload'}",
-        Verification: ""
-      },
       // 设置获取列表的素材类型及分页设置
       // 设置获取列表的素材类型及分页设置
       pageParam: {
@@ -104,8 +100,12 @@ export default {
     }
   },
   methods: {
+    changePage(currentPage) {
+      this.pageParam.PageNumber = currentPage;
+      this.getVoiceList();
+    },
     syncSuccess(response) {
-      if(response){
+      if (response) {
         this.getVoiceList();
         this.getCount();
       }
@@ -125,33 +125,15 @@ export default {
       }
     },
     uploadSuccess(data) {
-      if (res.Result) {
-        let uploadTime = Date.parse(new Date()) / 1000;
-        Object.defineProperty(res.Data, "CreatedDate", {
-          value: uploadTime
-        });
-        Object.defineProperty(res.Data, "FileName", {
-          value: file.name
-        });
-        this.voiceList.List.unshift(res.Data);
+      let uploadTime = Date.parse(new Date()) / 1000;
+      Object.defineProperty(data, "CreatedDate", {
+        value: uploadTime
+      });
+      this.voiceList.List.unshift(data);
+      if (this.voiceList.List.length > this.pageParam.PageSize) {
+        this.voiceList.List.pop();
       }
-    },
-    beforeAvatarUpload(file) {
-      console.log(file);
-      const isVoice =
-        file.type === "audio/mp3" ||
-        file.type === "audio/x-ms-wma" ||
-        file.type === "audio/wav" ||
-        file.type === "";
-      const isLt30M = file.size / 1024 / 1024 < 2;
-
-      if (!isVoice) {
-        this.$message.error("上传语音只能是 mp3/wav/wma/amr 格式!");
-      }
-      if (!isLt30M) {
-        this.$message.error("上传语音大小不能超过 2MB!");
-      }
-      return isVoice && isLt30M;
+      this.mediaConfig.totalCount++;
     },
     async getVoiceList() {
       try {
@@ -221,7 +203,7 @@ export default {
           console.log(index, ID);
           let postData = new FormData();
           postData.append("Act", "Material_Del");
-          postData.append("Verification", this.upLoadData.Verification);
+          postData.append("Verification", this.mediaConfig.verification);
           postData.append(
             "Param",
             JSON.stringify({
@@ -241,7 +223,8 @@ export default {
             type: "success",
             message: "删除成功!"
           });
-          this.voiceList.List.splice(index, 1);
+          // this.voiceList.List.splice(index, 1);
+          this.getVoiceList();
         } else {
           this.$message({
             type: "error",

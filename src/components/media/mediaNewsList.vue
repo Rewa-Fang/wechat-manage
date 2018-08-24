@@ -2,22 +2,10 @@
   <div class="media-list">
     <media-header :mediaConfig="mediaConfig" @uploadSuccess="uploadSuccess" @syncSuccess="syncSuccess"></media-header>
     <!-- <div>分组标签</div> -->
-    <!-- delete -->
-    <el-row class="delete-row" v-show="!delBtnDisabled">
-      <el-col :span="12" class="del-row-left">
-        <div>
-          <input class="del-checkbox" type="checkbox" id="all-checked" v-model="isAllChecked" @change="allChecked">
-          <label for="all-checked" style="margin:0"></label>
-          <span>已选择{{ checkedImageArr.length }}项内容</span>
-        </div>
-      </el-col>
-      <el-col :span="12" class="del-row-right">
-        <el-button type="danger" class="el-icon-delete" circle @click="deleteImg" :disabled="delBtnDisabled"></el-button>
-      </el-col>
-    </el-row>
+    
     <!-- image list -->
-    <el-row class="img-list media-list1">
-      <el-col :lg="4" :md="6" :sm="8" class="card-item" v-for="(item,index) in imageList.List" :key="item.ID">
+    <el-row class="img-list media-list4">
+      <el-col :lg="6" :md="8" :sm="12" class="card-item" v-for="(item,index) in imageList.List" :key="item.ID">
         <div class="item-img" :class="{'item-img-bg':checkedStyleArr[index]}">
           <img :src="baseImgPath+imageList.Path+'/'+item.FileRealName" alt="">
         </div>
@@ -30,7 +18,7 @@
     </el-row>
     <!-- if image list is null -->
     <div class="data-null" v-if="mediaConfig.totalCount <= 0">
-      <i class="el-icon-warning"></i>本地没有图片素材，您可以添加或同步素材
+      <i class="el-icon-warning"></i>本地没有图文信息，您可以添加或同步图文
     </div>
     <!-- pagination -->
     <my-pagination :pagiConfig="mediaConfig" @changePage="changePage" v-if="mediaConfig.totalCount > 0"></my-pagination>

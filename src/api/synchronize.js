@@ -34,12 +34,15 @@ export default async (mediaConfig, vueObject) => {
   vueObject.$syncProgress.show({
     text: "正在同步...",
     now: 0,
-    total: 200
+    total: mediaConfig.wxTotalCount
   });
 
-  for (let count = 0; count < 10; count++) {
+  for (let count = 0; count >= 0; count++) {
     if (vueObject.$syncProgress.cancel()) {
       let resOnce = await postSync(count);
+      if (resOnce.Data.ItemCount <= 0) {
+        break;
+      }
       syncCountNum = syncCountNum + resOnce.Data.ItemCount;
       console.log(syncCountNum);
       vueObject.$syncProgress.progress(syncCountNum);
@@ -50,7 +53,7 @@ export default async (mediaConfig, vueObject) => {
   }
   console.log(responseArr);
   setTimeout(() => {
-    // vueObject.$syncProgress.hide();
+    vueObject.$syncProgress.hide();
   }, 500);
   return responseArr;
 };

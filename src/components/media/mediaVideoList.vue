@@ -1,21 +1,10 @@
 <template>
   <div>
-
-    <el-row class="imgae-top">
-      <el-col :span="10">
-        <div class="image-count">视频(共{{ videoList.TotalCount }}条)</div>
-      </el-col>
-      <el-col :span="10" class="tips">
-        <span>格式支持mp4，文件大小不超过10M</span>
-      </el-col>
-      <el-col :span="4" class="upload-btn">
-        <el-upload :action="upLoadVideoUrl" :data="upLoadVideoData" :show-file-list="false" :on-success="upLoadSuccess" :before-upload="beforeAvatarUpload">
-          <el-button size="default" type="primary">添加视频</el-button>
-        </el-upload>
-      </el-col>
-    </el-row>
+    <!-- header add button, synchronize button -->
+    <media-header :mediaConfig="mediaConfig" @uploadSuccess="uploadSuccess" @syncSuccess="syncSuccess"></media-header>
     <!-- <div>分组标签</div> -->
-    <el-row class="img-list">
+    <!-- video list -->
+    <el-row class="img-list media-list3">
       <el-table :data="videoList.List" style="width: 100%" :row-style="rowStyle">
         <el-table-column label="标题">
           <template slot-scope="scope">
@@ -43,31 +32,39 @@
         </el-table-column>
       </el-table>
     </el-row>
+    <!-- pagination components -->
+    <my-pagination :pagiConfig="mediaConfig" @changePage="changePage" v-if="mediaConfig.totalCount > 0"></my-pagination>
   </div>
 </template>
 
 <script>
 import { postActionHandler } from "@/api/getData";
+import pagination from "./pagination";
+import header from "./header";
 export default {
+  components: {
+    myPagination: pagination,
+    mediaHeader: header
+  },
   data() {
     return {
+      mediaConfig: {
+        type: 3, //素材类型
+        pageSize: 5,
+        pagerCount: 7,
+        verification: "",
+        totalCount: 0, // 本地服务器素材总数
+        wxTotalCount: 0 // 微信服务器素材总数
+      },
       userInfo: {},
-      rowStyle: { 
+      rowStyle: {
         height: "130px"
       },
       videoList: {},
-      upLoadVideoUrl:
-        "http://wechat.a2designing.cn/Handlers/ActionHandler.ashx",
-      upLoadVideoData: {
-        Act: "Material_Add",
-        Param:
-          "{'Type':3, 'Title': 'video upload', 'Introduction': 'video upload'}",
-        Verification: ""
-      },
       // 设置获取列表的素材类型及分页设置
       pageParam: {
         Type: 3,
-        PageSize: 10,
+        PageSize: 5,
         PageNumber: 1
       }
     };
@@ -89,60 +86,60 @@ export default {
   created() {
     if (localStorage.adminInfo) {
       this.userInfo = JSON.parse(localStorage.adminInfo);
-      this.upLoadVideoData.Verification = JSON.stringify({
+      this.mediaConfig.verification = JSON.stringify({
         UserID: this.userInfo.ID,
         Token: this.userInfo.Token
       });
       this.getVideoList();
+      this.getCount();
     } else {
       this.$router.push("/login");
     }
   },
   computed: {},
   methods: {
-    upLoadSuccess(res, file) {
-      if (res.Result) {
-        let uploadTime = Date.parse(new Date()) / 1000;
-        Object.defineProperty(res.Data, "CreatedDate", {
-          value: uploadTime
-        });
-        Object.defineProperty(res.Data, "Introduction", {
-          value: 'upload vidoe test'
-        });
-        Object.defineProperty(res.Data, "FileName", {
-          value: file.name
-        });
-        this.videoList.List.unshift(res.Data);
+    changePage(currentPage) {
+      this.pageParam.PageNumber = currentPage;
+      this.getVideoList();
+    },
+    syncSuccess(response) {
+      if (response) {
+        this.getVideoList();
+        this.getCount();
       }
     },
-    beforeAvatarUpload(file) {
-      const isMP4 = file.type === "video/mp4";
-      const isLt10M = file.size / 1024 / 1024 < 10;
-
-      if (!isMP4) {
-        this.$message.error("上传视频只能是 MP4 格式!");
+    uploadSuccess(data) {
+      let uploadTime = Date.parse(new Date()) / 1000;
+      Object.defineProperty(data, "CreatedDate", {
+        value: uploadTime
+      });
+      Object.defineProperty(data, "Introduction", {
+        value: "upload vidoe test"
+      });
+      this.videoList.List.unshift(data);
+      if (this.videoList.List.length > this.pageParam.PageSize) {
+        this.videoList.List.pop();
       }
-      if (!isLt10M) {
-        this.$message.error("上传图片大小不能超过 10MB!");
-      }
-      return isMP4 && isLt10M;
+      this.mediaConfig.totalCount++;
     },
     async getVideoList() {
       try {
         let postData = new FormData();
         postData.append("Act", "Material_GetList");
         postData.append("Param", JSON.stringify(this.pageParam));
-        postData.append("Verification", this.upLoadVideoData.Verification);
+        postData.append("Verification", this.mediaConfig.verification);
         let response = await postActionHandler(postData);
-        console.log(response);
         if (response.Result) {
+          console.log(response);
           this.videoList = response.Data;
+          this.mediaConfig.totalCount = response.Data.TotalCount;
         } else {
+          console.log(response);
           this.$message({
             type: "error",
             message: response.Msg
           });
-          if (response.Code == "User000012") {
+          if (response.Code == "User000012" || response.Code == "User000014") {
             localStorage.removeItem("adminInfo");
             this.$router.push("/");
           }
@@ -155,6 +152,20 @@ export default {
         });
       }
     },
+    async getCount() {
+      try {
+        let postData = new FormData();
+        postData.append("Act", "Material_GetCountWX");
+        postData.append("Param", "{}");
+        postData.append("Verification", this.mediaConfig.verification);
+        let response = await postActionHandler(postData);
+        if (response.Result) {
+          this.mediaConfig.wxTotalCount = response.Data.video_count;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
     deleteVideo(index, ID) {
       this.$confirm("此操作将永久删除该视频, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -165,18 +176,18 @@ export default {
           console.log(index, ID);
           let postData = new FormData();
           postData.append("Act", "Material_Del");
-          postData.append("Verification", this.upLoadVideoData.Verification);
+          postData.append("Verification", this.mediaConfig.verification);
           postData.append(
             "Param",
             JSON.stringify({
               ID: Number(ID)
             })
           );
-          this.deleteVideoById(index,postData);
+          this.deleteVideoById(index, postData);
         })
         .catch(() => {});
     },
-    async deleteVideoById(index,postData) {
+    async deleteVideoById(index, postData) {
       try {
         let res = await postActionHandler(postData);
         console.log(res);
@@ -185,7 +196,8 @@ export default {
             type: "success",
             message: "删除成功!"
           });
-          this.videoList.List.splice(index, 1);
+          // this.videoList.List.splice(index, 1);
+          this.getVideoList();
         } else {
           this.$message({
             type: "error",

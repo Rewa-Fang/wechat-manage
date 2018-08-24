@@ -29,6 +29,7 @@
 <script>
 import { baseUrl } from "@/config/env";
 import synchronize from "@/api/synchronize";
+import { checkedMediaType, checkedMediaSize, typeMsg, sizeMsg } from "@/config/mediaType";
 export default {
   props: ["mediaConfig"],
   data() {
@@ -50,7 +51,8 @@ export default {
         },
         Verification: ""
       },
-      btnLoading: false
+      btnLoading: false,
+      loadingInstance:{}
     };
   },
   created() {
@@ -64,8 +66,7 @@ export default {
           break;
         case 2:
           this.mediaType = "语音";
-          this.tipsText =
-            "支持mp3/wma/wav/amr，大小不超过2M，时长不超过60秒";
+          this.tipsText = "格式mp3/wma/wav/amr，大小不超过2M，时长不超过60秒";
           break;
         case 3:
           this.mediaType = "视频";
@@ -87,39 +88,39 @@ export default {
         console.log(res);
         this.$emit("uploadSuccess", res.Data);
         // this.imageList.List.unshift(res.Data);
+        this.$message.success("添加成功");
       } else {
         this.$message.error("上传失败，请稍后重试!");
       }
       this.btnLoading = false;
+      this.loadingInstance.close();
     },
     upLoadError(err, file) {
       console.log(err);
       this.btnLoading = false;
     },
     beforeAvatarUpload(file) {
-      const isJPG =
-        file.type === "image/jpeg" ||
-        file.type === "image/png" ||
-        file.type === "image/jpg" ||
-        file.type === "image/gif" ||
-        file.type === "image/bmp";
-      const isLt2M = file.size / 1024 / 1024 < 2;
+      this.loadingInstance = this.$loading({
+        target:'.media-list'+this.mediaConfig.type,
+        text:'正在上传...'
+      });
+      const isType = checkedMediaType(this.mediaConfig.type, file.type);
+      const isSize = checkedMediaSize(this.mediaConfig.type, file.size);
 
-      if (!isJPG) {
-        this.$message.error("上传图片只能是 bmp/png/jpeg/jpg/gif 格式!");
+      if (!isType) {
+        this.$message.error(typeMsg[this.mediaConfig.type]);
+      }else if (!isSize) {
+        this.$message.error(sizeMsg[this.mediaConfig.type]);
       }
-      if (!isLt2M) {
-        this.$message.error("上传图片大小不能超过 2MB!");
-      }
-      return isJPG && isLt2M;
+      return isType && isSize;
     },
     uploadProgress() {
       this.btnLoading = true;
     },
     syncImage() {
-      //wxTotalCount
+
       this.$confirm(
-        `此操作将同步${this.mediaConfig.wxTotalCount}张图片, 是否继续?`,
+        `此操作将同步${this.mediaConfig.wxTotalCount}条素材, 是否继续?`,
         "提示",
         {
           confirmButtonText: "同步",

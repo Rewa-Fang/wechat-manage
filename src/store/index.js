@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {getAdminInfo} from '@/api/getData'
+import { postActionHandler } from '@/api/getData'
 
 Vue.use(Vuex)
 
@@ -11,23 +11,33 @@ const state = {
 }
 
 const mutations = {
-	saveAdminInfo(state, adminInfo){
+	saveAdminInfo(state, adminInfo) {
 		state.adminInfo = adminInfo;
 	}
 }
 
 const actions = {
-	async getAdminData({commit}){
-		// try{
-		// 	const res = await getAdminInfo()
-		// 	if (res.status == 1) {
-		// 		commit('saveAdminInfo', res.data);
-		// 	}else{
-		// 		throw new Error(res)
-		// 	}
-		// }catch(err){
-		// 	console.log('您尚未登陆或者session失效')
-		// }
+	async getAdminData({ commit }) {
+		try {
+			let adminInfo = JSON.parse(localStorage.getItem('adminInfo'));
+			if (adminInfo.Token) {
+				let getInfoData = new FormData();
+				getInfoData.append("Act", "User_GetInfo");
+				getInfoData.append("Param", "{}");
+				getInfoData.append("Verification", JSON.stringify({UserID:adminInfo.ID,Token:adminInfo.Token}));
+				const res = await postActionHandler(getInfoData);
+				if (res.Result) {
+					commit('saveAdminInfo', res.Data);
+				} else {
+					throw new Error(res.Msg);
+				}
+				return res;
+			} else {
+				return { Result: false, Msg: '您尚未登陆或者session失效' };
+			}
+		} catch (err) {
+			console.log('您尚未登陆或者session失效')
+		}
 	}
 }
 

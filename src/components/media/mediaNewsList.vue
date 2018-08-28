@@ -2,17 +2,25 @@
   <div class="media-list">
     <media-header :mediaConfig="mediaConfig" @uploadSuccess="uploadSuccess" @syncSuccess="syncSuccess"></media-header>
     <!-- <div>分组标签</div> -->
-    
+
     <!-- image list -->
-    <el-row class="img-list media-list4">
-      <el-col :lg="6" :md="8" :sm="12" class="card-item" v-for="(item,index) in imageList.List" :key="item.ID">
-        <div class="item-img" :class="{'item-img-bg':checkedStyleArr[index]}">
-          <img :src="baseImgPath+imageList.Path+'/'+item.FileRealName" alt="">
+    <el-row class="img-list media-list4" type="flex">
+      <el-col class="card-item" v-for="(item,index) in newsList.List" :key="item.ID">
+        <div class="card-title">{{ item.Title }}</div>
+        <div class="item-img">
+          <img :src="item.Articles[0].thumb_url" alt="">
+          <div class="preview-news">
+            <span @click="previewNews(item.Articles[0].url)">预览文章</span>
+          </div>
         </div>
-        <div class="card-title">{{ item.FileName }}</div>
-        <div class="chckedBox-menu" :class="{'chckedBox-menu-block':checkedStyleArr[index]}">
-          <input class="del-checkbox" type="checkbox" :id="item.ID" :value="item.ID" v-model="checkedImageArr" @change="changeChecked(index)">
-          <label :for="item.ID"></label>
+        <div class="card-digest">{{ item.Articles[0].digest }}</div>
+        <div class="card-action">
+          <div class="card-update">更新于{{ item.UpdatedDate | dateFormatString }}</div>
+          <div class="button-menu">
+            <el-button type="default" plain class="el-icon-edit" title="编辑" @click="editNews(item)"></el-button>
+            <el-button type="danger" plain class="el-icon-delete" title="删除" @click="deleteNews(index,item.ID)"></el-button>
+          </div>
+          <div style="clear:both;"></div>
         </div>
       </el-col>
     </el-row>
@@ -27,7 +35,8 @@
 
 <script>
 import { postActionHandler } from "@/api/getData";
-import { baseImgPath } from "@/config/env";
+import dateFormat from "@/filters/dateFormat";
+import { baseImgPath, wxImageUrl } from "@/config/env";
 import pagination from "./pagination";
 import header from "./header";
 export default {
@@ -38,21 +47,20 @@ export default {
   data() {
     return {
       mediaConfig: {
-        type: 1,
-        pageSize: 15,
+        type: 4,
+        pageSize: 10,
         pagerCount: 7,
         verification: "",
         totalCount: 0, // 本地服务器素材总数
         wxTotalCount: 0 // 微信服务器素材总数
       },
       baseImgPath,
+      wxImageUrl,
       userInfo: {},
-      imageList: {},
-      Verification: "",
+      newsList: {},
       // 设置获取列表的素材类型及分页设置
       pageParam: {
-        Type: 1,
-        PageSize: 15,
+        PageSize: 12,
         PageNumber: 0
       },
       isAllChecked: false,
@@ -62,14 +70,9 @@ export default {
       btnLoading: false
     };
   },
-  watch: {
-    checkedImageArr(val) {
-      if (val.length > 0) {
-        this.delBtnDisabled = false;
-      } else {
-        this.delBtnDisabled = true;
-        this.isAllChecked = false;
-      }
+  filters: {
+    dateFormatString(timestamp) {
+      return dateFormat(timestamp);
     }
   },
   created() {
@@ -79,7 +82,7 @@ export default {
         UserID: this.userInfo.ID,
         Token: this.userInfo.Token
       });
-      this.getImageList();
+      this.getNewsList();
       this.getCount();
     } else {
       this.$router.push("/login");
@@ -87,21 +90,29 @@ export default {
   },
   computed: {},
   methods: {
+    editNews(item){
+      this.$router.push({
+        name:'EditNews',
+        params:{news:item}
+      });
+    },
+    previewNews(url) {
+      window.open(url);
+    },
     changePage(currentPage) {
       this.pageParam.PageNumber = currentPage;
-      this.getImageList();
+      this.getNewsList();
     },
-    async getImageList() {
+    async getNewsList() {
       try {
         let postData = new FormData();
-        postData.append("Act", "Material_GetList");
+        postData.append("Act", "Material_GetNewsList");
         postData.append("Param", JSON.stringify(this.pageParam));
         postData.append("Verification", this.mediaConfig.verification);
         let response = await postActionHandler(postData);
         if (response.Result) {
           console.log(response);
-          this.imageList = response.Data;
-          // this.imageList.List.reverse();
+          this.newsList = response.Data;
           this.mediaConfig.totalCount = response.Data.TotalCount;
         } else {
           console.log(response);
@@ -122,42 +133,34 @@ export default {
         });
       }
     },
-    deleteImg() {
-      this.$confirm("此操作将永久删除该图片, 是否继续?", "提示", {
+    deleteNews(index, ID) {
+      this.$confirm("此操作将永久删除该图文, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
-        .then(() => {
-          if (this.checkedImageArr.length > 0) {
-            this.checkedImageArr.forEach(img => {
-              let postData = new FormData();
-              postData.append("Act", "Material_Del");
-              postData.append("Verification", this.mediaConfig.verification);
-              postData.append(
-                "Param",
-                JSON.stringify({
-                  ID: Number(img),
-                  OnlyLocal: true
-                })
-              );
-              this.deleteImgById(postData);
-            });
-          } else {
-            this.$message({
-              type: "info",
-              message: "请选择至少一张图片"
-            });
-          }
-        })
-        .catch(() => {
-          // this.$message({
-          //   type: "info",
-          //   message: "已取消删除"
-          // });
-        });
+      .then(() => {
+        let postData = new FormData();
+        postData.append("Act", "Material_Del");
+        postData.append("Verification", this.mediaConfig.verification);
+        postData.append(
+          "Param",
+          JSON.stringify({
+            ID: Number(ID),
+            OnlyLocal: true
+          })
+        );
+        console.log(postData);
+        this.deleteNewsById(postData);
+      })
+      .catch(() => {
+        // this.$message({
+        //   type: "info",
+        //   message: "已取消删除"
+        // });
+      });
     },
-    async deleteImgById(postData) {
+    async deleteNewsById(postData) {
       console.log(postData);
       try {
         let res = await postActionHandler(postData);
@@ -167,17 +170,10 @@ export default {
             type: "success",
             message: "删除成功!"
           });
-          this.imageList.List.forEach((img, index) => {
-            if (this.checkedImageArr.includes(img.ID)) {
-              // this.imageList.List.splice(index, 1);
-              this.checkedImageArr.splice(
-                this.checkedImageArr.indexOf(img.ID),
-                1
-              );
-              // this.mediaConfig.totalCount--;
-            }
-          });
-          this.getImageList();
+
+          this.newsList.List.splice(index, 1);
+          this.mediaConfig.totalCount--;
+          // this.getNewsList();
         } else {
           this.$message({
             type: "error",
@@ -191,27 +187,9 @@ export default {
         });
       }
     },
-    changeChecked(index) {
-      this.checkedStyleArr[index] = !this.checkedStyleArr[index];
-    },
-    allChecked() {
-      if (this.isAllChecked) {
-        this.imageList.List.forEach((img, index) => {
-          this.checkedImageArr[index] = img.ID;
-        });
-        this.checkedImageArr = [...this.checkedImageArr];
-        this.checkedStyleArr = this.checkedImageArr;
-        // console.log(this.checkedImageArr);
-        // this.delBtnDisabled = false;
-      } else {
-        this.checkedStyleArr = [];
-        this.checkedImageArr = [];
-        // this.delBtnDisabled = true;
-      }
-    },
     syncSuccess(response) {
       if (response) {
-        this.getImageList();
+        this.getNewsList();
         this.getCount();
       }
     },
@@ -223,16 +201,16 @@ export default {
         postData.append("Verification", this.mediaConfig.verification);
         let response = await postActionHandler(postData);
         if (response.Result) {
-          this.mediaConfig.wxTotalCount = response.Data.image_count;
+          this.mediaConfig.wxTotalCount = response.Data.news_count;
         }
       } catch (error) {
         console.log(error);
       }
     },
     uploadSuccess(data) {
-      this.imageList.List.unshift(data);
-      if (this.imageList.List.length > this.pageParam.PageSize) {
-        this.imageList.List.pop();
+      this.newsList.List.unshift(data);
+      if (this.newsList.List.length > this.pageParam.PageSize) {
+        this.newsList.List.pop();
       }
       this.mediaConfig.totalCount++;
     }
@@ -246,15 +224,20 @@ export default {
 }
 .img-list {
   padding: 2% 0;
+  flex-wrap: wrap;
 }
 .data-null {
   text-align: center;
   margin-top: 100px;
 }
 .card-item {
+  flex: 0 0 26%;
   position: relative;
-  margin: 0 20px 20px 0;
-  height: 200px;
+  margin: 0 15px 20px 0;
+  /* height: 280px; */
+  background-color: #f3f5f9;
+  padding: 10px;
+  border-radius: 5px;
 }
 .item-img {
   width: 100%;
@@ -262,72 +245,71 @@ export default {
   overflow: hidden;
   display: flex;
   align-items: center;
+  position: relative;
 }
 .item-img img {
   width: 100%;
   height: auto;
 }
-.card-title {
+.preview-news {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   text-align: center;
+  line-height: 160px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 14px;
+  display: none;
+}
+.card-item:hover .preview-news {
+  display: block;
+}
+.preview-news span {
+  cursor: pointer;
+}
+.card-title {
+  /* text-align: center; */
   height: 30px;
   line-height: 30px;
   overflow: hidden;
   overflow-wrap: normal;
   text-overflow: ellipsis;
 }
-.chckedBox-menu {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 30px;
-  width: 100%;
+.card-digest {
+  font-size: 14px;
+  padding: 10px 0;
+  color: #9a9a9a;
+}
+.card-action {
+  height: 50px;
+  line-height: 50px;
+  font-size: 14px;
+  color: #9a9a9a;
+}
+.card-update {
+  float: left;
+  width: 50%;
+}
+.button-menu {
+  float: left;
+  width: 50%;
   display: none;
-}
-.card-item:hover .chckedBox-menu {
-  display: block;
-}
-.card-item:hover .item-img {
-  background-color: #eaffea;
-}
-.item-img-bg {
-  background-color: #eaffea;
-}
-.chckedBox-menu-block {
-  display: block;
-}
-.del-checkbox {
-  display: none;
-}
-.del-checkbox + label {
-  display: inline-block;
-}
-.del-checkbox + label::before {
-  content: "";
-  display: block;
-  width: 20px;
-  height: 20px;
-  margin: 5px;
-  background-clip: content-box;
-  background-color: #ccc;
-  border: 1px solid #fff;
-  text-align: center;
-  border-radius: 2px;
-}
-.del-checkbox:checked + label::before {
-  background-color: #409eff;
-  content: "\2714";
-  color: #ffffff;
-}
-.delete-row {
-  background-color: #f6f8f9;
-  padding: 16px;
-}
-.del-row-left div {
-  display: flex;
-  align-items: center;
-}
-.del-row-right {
   text-align: right;
-  color: #eaffea;
+}
+.button-menu button {
+  background: none;
+  padding: 0;
+  color: #9a9a9a;
+  border: 0;
+  font-size: 18px;
+}
+.button-menu button:hover {
+  background: none;
+}
+.card-item:hover .button-menu {
+  display: block;
 }
 </style>

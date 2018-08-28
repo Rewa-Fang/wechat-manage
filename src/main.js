@@ -4,6 +4,7 @@ import router from './router'
 import store from './store/'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-default/index.css'
+import '@/assets/iconFonts/iconfont.css'
 import 'babel-polyfill';
 import SyncProgress from '@/plugin/syncProgress/syncProgress.js'
 

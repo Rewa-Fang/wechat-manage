@@ -8,6 +8,7 @@ const login = r => require.ensure([], () => r(require('@/page/login')), 'login')
 const manage = r => require.ensure([], () => r(require('@/page/manage')), 'manage');
 const home = r => require.ensure([], () => r(require('@/page/home')), 'home');
 const media = r => require.ensure([], () => r(require('@/page/media')), 'media');
+const editNews = r => require.ensure([], () => r(require('@/page/news/editNews')), 'editNews');
 
 const routes = [
 	{
@@ -29,6 +30,11 @@ const routes = [
 			path:'/media',
 			component:media,
 			name: 'Media'
+		},{
+			path:'/editNews/:news',
+			component:editNews,
+			name: 'EditNews',
+			props:true
 		}]
 	},
 ];

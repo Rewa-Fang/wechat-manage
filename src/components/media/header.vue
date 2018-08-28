@@ -5,6 +5,8 @@
         <div class="image-count">{{ mediaType }}(共{{ mediaConfig.totalCount }}条)</div>
       </el-col>
       <el-col :xs="10" :sm="10" :md="12" :lg="11" :xl="8" class="tips">
+        <el-input class="search-input" v-show="mediaConfig.type==4" placeholder="请输入标题" prefix-icon="el-icon-search" v-model="newsSearch">
+        </el-input>
         <span>{{ tipsText }} </span>
         <el-tooltip effect="dark" content="不添加水印" placement="top-start" v-if="mediaConfig.type==1">
           <i class="el-icon-warning"></i>
@@ -13,9 +15,10 @@
       <el-col :xs="8" :sm="8" :md="8" :lg="5" :xl="4" class="upload-btn">
         <el-row>
           <el-col :span="12">
-            <el-upload :action="upLoadUrl" :data="upLoadData" :show-file-list="false" :on-success="upLoadSuccess" :before-upload="beforeAvatarUpload" :on-progress="uploadProgress">
+            <el-upload v-if="mediaConfig.type <= 3" :action="upLoadUrl" :data="upLoadData" :show-file-list="false" :on-success="upLoadSuccess" :before-upload="beforeAvatarUpload" :on-progress="uploadProgress">
               <el-button size="default" type="primary" :loading="btnLoading">添加{{ mediaType }}</el-button>
             </el-upload>
+            <el-button v-else size="default" type="primary" :loading="btnLoading" @click="addNews">新增{{ mediaType }}</el-button>
           </el-col>
           <el-col :span="12">
             <el-button size="default" type="success" @click="syncImage" :loading="btnLoading">同步{{ mediaType }}</el-button>
@@ -29,11 +32,17 @@
 <script>
 import { baseUrl } from "@/config/env";
 import synchronize from "@/api/synchronize";
-import { checkedMediaType, checkedMediaSize, typeMsg, sizeMsg } from "@/config/mediaType";
+import {
+  checkedMediaType,
+  checkedMediaSize,
+  typeMsg,
+  sizeMsg
+} from "@/config/mediaType";
 export default {
   props: ["mediaConfig"],
   data() {
     return {
+      newsSearch:"", // 图文搜索框
       baseUrl,
       mediaType: "",
       tipsText: "",
@@ -52,7 +61,7 @@ export default {
         Verification: ""
       },
       btnLoading: false,
-      loadingInstance:{}
+      loadingInstance: {}
     };
   },
   created() {
@@ -72,6 +81,10 @@ export default {
           this.mediaType = "视频";
           this.tipsText = "格式支持mp4，文件大小不超过10M";
           break;
+        case 4:
+          this.mediaType = "图文";
+          this.tipsText = "";
+          break;
         default:
           break;
       }
@@ -80,6 +93,12 @@ export default {
     this.upLoadData.Param = JSON.stringify(this.upLoadData.Param);
   },
   methods: {
+    addNews(){
+      this.$router.push({
+        name:'EditNews',
+        params:{}
+      });
+    },
     upLoadSuccess(res, file) {
       if (res.Result) {
         Object.defineProperty(res.Data, "FileName", {
@@ -101,15 +120,15 @@ export default {
     },
     beforeAvatarUpload(file) {
       this.loadingInstance = this.$loading({
-        target:'.media-list'+this.mediaConfig.type,
-        text:'正在上传...'
+        target: ".media-list" + this.mediaConfig.type,
+        text: "正在上传..."
       });
       const isType = checkedMediaType(this.mediaConfig.type, file.type);
       const isSize = checkedMediaSize(this.mediaConfig.type, file.size);
 
       if (!isType) {
         this.$message.error(typeMsg[this.mediaConfig.type]);
-      }else if (!isSize) {
+      } else if (!isSize) {
         this.$message.error(sizeMsg[this.mediaConfig.type]);
       }
       return isType && isSize;
@@ -118,7 +137,6 @@ export default {
       this.btnLoading = true;
     },
     syncImage() {
-
       this.$confirm(
         `此操作将同步${this.mediaConfig.wxTotalCount}条素材, 是否继续?`,
         "提示",
@@ -168,5 +186,8 @@ export default {
 }
 .upload-btn {
   text-align: right;
+}
+.search-input{
+  width: 300px;
 }
 </style>

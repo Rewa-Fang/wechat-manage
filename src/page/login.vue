@@ -91,6 +91,8 @@ export default {
           if (res.Result) {
             localStorage.adminInfo = JSON.stringify(res.Data);
             this.saveAdminInfo(res.Data);
+            console.log(this.adminInfo);
+            
             this.$message({
               type: "success",
               message: "登录成功"

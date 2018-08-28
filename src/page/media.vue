@@ -11,7 +11,7 @@
         <img-list></img-list>
       </el-tab-pane>
       <el-tab-pane label="语音" name="voice">
-        <voice-list></voice-list>
+        <voice-list :activeName="activeName"></voice-list>
       </el-tab-pane>
       <el-tab-pane label="视频" name="video">
         <video-list></video-list>
@@ -55,6 +55,7 @@ export default {
   methods: {
     ...mapMutations(["saveAdminInfo"]),
     handleClick(tab, event) {
+
     }
   }
 };

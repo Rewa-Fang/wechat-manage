@@ -40,6 +40,7 @@ import { baseImgPath } from "@/config/env";
 import pagination from "./pagination";
 import header from "./header";
 export default {
+  props:['activeName'],
   components: {
     myPagination: pagination,
     mediaHeader: header
@@ -71,6 +72,13 @@ export default {
       curPlayVoice: {},
       curPlayMediaId: ""
     };
+  },
+  watch:{
+    activeName(newVal){
+      if(newVal != 'voice'){  // 监测tabs切换 停止语音播放
+        this.curPlayVoice.pause();
+      }
+    }
   },
   created() {
     if (localStorage.adminInfo) {

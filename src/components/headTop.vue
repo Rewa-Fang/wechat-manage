@@ -1,18 +1,28 @@
 <template>
-	<div class="header_container">
+  <div class="header_container">
+    <div>
+      {{ pageTitle }}
+    </div>
+    <div>
 
-		<el-breadcrumb separator="/">
-			<el-breadcrumb-item>{{ pageTitle }}</el-breadcrumb-item>
-			<el-breadcrumb-item v-for="(item, index) in $route.meta" :key="index">{{item}}</el-breadcrumb-item>
-		</el-breadcrumb>
-		<el-dropdown @command="handleCommand" menu-align='start'>
-			<img :src="adminInfo.CompanyLogo" class="avator">
-			<el-dropdown-menu slot="dropdown">
-				<el-dropdown-item command="home">首页</el-dropdown-item>
-				<el-dropdown-item command="singout">退出</el-dropdown-item>
-			</el-dropdown-menu>
-		</el-dropdown>
-	</div>
+      <div class="user-info">
+        <div class="company-logo"><img :src="adminInfo.CompanyLogo?'':'http://a2designing.cn/logo/a2.png'" :alt="adminInfo.CompanyName"></div>
+        <div class="company-name">
+          <div>{{ adminInfo.CompanyName }}</div>
+          <div class="nick-name">{{ adminInfo.NickName }}</div>
+        </div>
+        <el-dropdown @command="handleCommand" trigger="click">
+          <i class="el-icon-arrow-down el-icon--right arrow"></i>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="home">首页</el-dropdown-item>
+            <el-dropdown-item command="update">修改信息</el-dropdown-item>
+            <el-dropdown-item command="singout">退出</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </div>
+
+    </div>
+  </div>
 </template>
 
 <script>
@@ -29,8 +39,9 @@ export default {
   },
   created() {
     if (!this.adminInfo.ID) {
-      this.getAdminData();
+      this.getAdminInfo();
     }
+    console.log(this.adminInfo);
   },
   computed: {
     ...mapState(["adminInfo"])
@@ -39,29 +50,41 @@ export default {
     ...mapActions(["getAdminData"]),
     async handleCommand(command) {
       if (command == "home") {
-        this.$router.push("/manage");
+        this.$router.push("/");
       } else if (command == "singout") {
-        const res = await signout();
-        if (res.status == 1) {
-          this.$message({
-            type: "success",
-            message: "退出成功"
-          });
+        this.$confirm("确认退出系统？", "提示", {
+          confirmButtonText: "退出",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(() => {
+          localStorage.removeItem("adminInfo");
           this.$router.push("/login");
-        } else {
+        }).catch(()=>{
+
+        })
+      } else if (command == "update") {
+        alert("update");
+      }
+    },
+    async getAdminInfo() {
+      try {
+        let res = await this.getAdminData();
+        if (!res.Result) {
           this.$message({
             type: "error",
-            message: res.message
+            message: res.Msg
           });
         }
+        console.log(this.adminInfo);
+      } catch (error) {
+        throw new Error(error);
       }
     }
   }
 };
 </script>
 
-<style lang="less">
-@import "../style/mixin";
+<style scoped>
 .header_container {
   background-color: #eff2f7;
   height: 60px;
@@ -69,13 +92,29 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding-left: 20px;
+  padding-right: 20px;
 }
-.avator {
-  .wh(36px, 36px);
+.user-info {
+  display: flex;
+  align-items: center;
+}
+.company-logo {
+  /* padding: 4px; */
+}
+.company-logo img {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  margin-right: 37px;
 }
-.el-dropdown-menu__item {
-  text-align: center;
+.company-name div {
+  padding: 2px 20px 2px 4px;
+  cursor: pointer;
+}
+.nick-name {
+  color: #9a9a9a;
+  font-size: 14px;
+}
+.arrow {
+  cursor: pointer;
 }
 </style>

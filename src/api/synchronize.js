@@ -27,7 +27,14 @@ const postSync = async (time) => {
 };
 export default async (mediaConfig, vueObject) => {
   let syncCountNum = 0;
-  paramData.Param.Type = mediaConfig.type;
+
+  if(mediaConfig.type == 4){ // 图文同步的参数不一样
+    paramData.Act = 'Material_SynchronizeNews';
+    delete paramData.Param.Type;
+  }else{
+    paramData.Param.Type = mediaConfig.type;
+  }
+  
   paramData.Verification = mediaConfig.verification;
   let time = Math.ceil(mediaConfig.wxTotalCount / paramData.Param.Count);
   let responseArr = [];

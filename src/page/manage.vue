@@ -47,9 +47,9 @@
 				</el-menu>
 			</el-col>
 			<el-col :span="20" class="view-page" >
-				<keep-alive>
+				<!-- <keep-alive> -->
 					<router-view></router-view>
-				</keep-alive>
+				<!-- </keep-alive> -->
 			</el-col>
 		</el-row>
 	</div>

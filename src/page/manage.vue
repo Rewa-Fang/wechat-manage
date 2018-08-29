@@ -3,14 +3,14 @@
 		<head-top :pageTitle="pageTitle"></head-top>
 		<el-row style="height: 100%;" type="flex" class="noWarp">
 			<el-col :span="4" style="min-height: 100%;min-width:200px; background-color: #324057;">
-				<el-menu :default-active="defaultActive" style="min-height: 100%;" theme="dark" router>
+				<el-menu style="min-height: 100%;" theme="dark" router>
 					<el-menu-item index="/">
 						<i class="el-icon-menu"></i>首页</el-menu-item>
 					<el-submenu index="2">
 						<template slot="title">
 							<i class="el-icon-document"></i>管理</template>
 						<el-menu-item index="media">素材管理</el-menu-item>
-						<el-menu-item index="shopList">商家列表</el-menu-item>
+						<el-menu-item index="fans">粉丝管理</el-menu-item>
 						<el-menu-item index="foodList">食品列表</el-menu-item>
 						<el-menu-item index="orderList">订单列表</el-menu-item>
 						<el-menu-item index="adminList">管理员列表</el-menu-item>
@@ -62,11 +62,6 @@ export default {
     return {
       pageTitle: "A2微信公众号后台管理系统"
     };
-  },
-  computed: {
-    defaultActive: function(index) {
-      return this.$route.path.replace("/", "");
-    }
   },
   components: {
     headTop

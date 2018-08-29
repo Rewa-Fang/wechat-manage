@@ -1,11 +1,26 @@
 <template>
   <div>
-    <div class="edit_container">
-      <quill-editor v-model="content" ref="myQuillEditor" :options="editorOption" @ready="onEditorReady($event)">
-      </quill-editor>
-    </div>
-    <div class="submit_btn">
-      <el-button type="primary" @click="submit">提交</el-button>
+    <div class="news-container">
+      <div class="news-info">
+        <el-form :label-position="labelPosition" label-width="80px" :model="newsArticles">
+          <el-form-item label="标题">
+            <el-input v-model="newsArticles.title"></el-input>
+          </el-form-item>
+          <el-form-item label="作者">
+            <el-input v-model="newsArticles.author" class="author-input"></el-input>
+          </el-form-item>
+          <el-form-item label="摘要">
+            <el-input v-model="newsArticles.digest" :rows="3" resize="none" type="textarea"></el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div class="edit-container">
+        <quill-editor v-model="newsArticles.content" ref="myQuillEditor" :options="editorOption" @ready="onEditorReady($event)">
+        </quill-editor>
+      </div>
+      <div class="submit-btn">
+        <el-button type="primary" @click="submit">提交</el-button>
+      </div>
     </div>
   </div>
 </template>
@@ -18,13 +33,21 @@ export default {
   data() {
     return {
       content: "<h3>文本编辑</h3>",
-      editorOption: {}
+      editorOption: {},
+      labelPosition: "right",
+      newsArticles: {
+        title: "",
+        author: "",
+        digest: "",
+        content: ""
+      }
     };
   },
   created() {
     console.log(this.news);
     if (this.news) {
-      this.content = this.news.Articles[0].content;
+      // this.content = this.news.Articles[0].content;
+      this.newsArticles = this.news.Articles[0];
     }
   },
   computed: {
@@ -48,4 +71,10 @@ export default {
 </script>
 
 <style scoped>
+.news-container{
+  width: 70%;
+}
+.author-input{
+  width: 35%;
+}
 </style>

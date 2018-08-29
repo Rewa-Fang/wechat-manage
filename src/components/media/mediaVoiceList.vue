@@ -17,7 +17,7 @@
         </el-table-column>
         <el-table-column label="更新时间">
           <template slot-scope="scope">
-            <span>{{ scope.row.CreatedDate | dateFormat}}</span>
+            <span>{{ scope.row.CreatedDate | dateFormatString}}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作">
@@ -36,6 +36,7 @@
 
 <script>
 import { postActionHandler } from "@/api/getData";
+import dateFormat from "@/filters/dateFormat";
 import { baseImgPath } from "@/config/env";
 import pagination from "./pagination";
 import header from "./header";
@@ -75,7 +76,7 @@ export default {
   },
   watch:{
     activeName(newVal){
-      if(newVal != 'voice'){  // 监测tabs切换 停止语音播放
+      if(newVal != 'voice' && this.curPlayVoice.pause ){  // 监测tabs切换 停止语音播放
         this.curPlayVoice.pause();
       }
     }
@@ -94,17 +95,8 @@ export default {
     }
   },
   filters: {
-    dateFormat(timestamp) {
-      let date = new Date(timestamp * 1000);
-      let year = date.getFullYear(),
-        month = date.getMonth() + 1,
-        day = date.getDate();
-      let nowDateYear = new Date().getFullYear();
-      if (year == nowDateYear) {
-        return month + "月" + day + "日";
-      } else {
-        return year + "年" + month + "月" + day + "日";
-      }
+    dateFormatString(timestamp) {
+      return dateFormat(timestamp);
     }
   },
   methods: {

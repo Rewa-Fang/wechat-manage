@@ -1,42 +1,42 @@
 <template>
-	<div class="login_page fillcontain">
-		<transition name="form-fade" mode="in-out">
-			<section class="form_contianer" v-show="showLogin">
-				<div class="manage_tip">
-					<p>官微后台管理系统</p>
-				</div>
-				<el-form :model="loginForm" :rules="rules" ref="loginForm">
-					<el-form-item prop="username">
-						<el-input v-model="loginForm.username" placeholder="用户名">
-							<span>dsfsf</span>
-						</el-input>
-					</el-form-item>
-					<el-form-item prop="password">
-						<el-input type="password" placeholder="密码" v-model="loginForm.password"></el-input>
-					</el-form-item>
-					<el-form-item prop="verificationCode">
-						<el-col :span="12">
-							<el-input placeholder="验证码" v-model="loginForm.verificationCode"></el-input>
-						</el-col>
-						<el-col :span="12">
-							<img :src="loginForm.verificationCodeImg + loginForm.codeUIDRandom" @click="changeCodeImg">
-						</el-col>
-					</el-form-item>
-					<el-form-item>
-						<el-button type="primary" @click="submitForm('loginForm')" class="submit_btn">登 录</el-button>
-					</el-form-item>
-				</el-form>
-				<p class="tip">温馨提示：</p>
-				<p class="tip">暂不提供注册，请联系管理员索取帐号密码</p>
-				<!-- <p class="tip">注册过的用户可凭账号密码登录</p> -->
-			</section>
-		</transition>
-	</div>
+  <div class="login_page fillcontain">
+    <transition name="form-fade" mode="in-out">
+      <section class="form_contianer" v-show="showLogin">
+        <div class="manage_tip">
+          <p>官微后台管理系统</p>
+        </div>
+        <el-form :model="loginForm" :rules="rules" ref="loginForm">
+          <el-form-item prop="username">
+            <el-input v-model="loginForm.username" placeholder="用户名">
+              <span>dsfsf</span>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="password">
+            <el-input type="password" placeholder="密码" v-model="loginForm.password"></el-input>
+          </el-form-item>
+          <el-form-item prop="verificationCode">
+            <el-col :span="12">
+              <el-input placeholder="验证码" v-model="loginForm.verificationCode"></el-input>
+            </el-col>
+            <el-col :span="12">
+              <img :src="loginForm.verificationCodeImg + loginForm.codeUIDRandom" @click="changeCodeImg">
+            </el-col>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="submitForm('loginForm')" class="submit_btn">登 录</el-button>
+          </el-form-item>
+        </el-form>
+        <p class="tip">温馨提示：</p>
+        <p class="tip">暂不提供注册，请联系管理员索取帐号密码</p>
+        <!-- <p class="tip">注册过的用户可凭账号密码登录</p> -->
+      </section>
+    </transition>
+  </div>
 </template>
 
 <script>
 import { login, getAdminInfo, getCodeImg, getCode } from "@/api/getData";
-import { mapActions, mapState,mapMutations } from "vuex";
+import { mapActions, mapState, mapMutations } from "vuex";
 
 export default {
   data() {
@@ -44,10 +44,11 @@ export default {
       loginForm: {
         username: "",
         password: "",
-				verificationCode: "",
-				verificationCodeUID:"",
-        verificationCodeImg: "http://wechat.a2designing.cn/handlers/VerificationCodeImg.ashx?UID=",
-        codeUIDRandom:""
+        verificationCode: "",
+        verificationCodeUID: "",
+        verificationCodeImg:
+          "http://wechat.a2designing.cn/handlers/VerificationCodeImg.ashx?UID=",
+        codeUIDRandom: ""
       },
       rules: {
         username: [
@@ -64,14 +65,14 @@ export default {
   mounted() {
     this.showLogin = true;
     if (!this.adminInfo.ID) {
-      if(localStorage.adminInfo){
+      if (localStorage.adminInfo) {
         this.saveAdminInfo(JSON.parse(localStorage.adminInfo));
-        this.$router.push('/');
-      }else{
-        this.getAdminData()
+        this.$router.push("/#/media");
+      } else {
+        this.getAdminData();
       }
-    }else{
-      this.$router.push('/');
+    } else {
+      this.$router.push("/#/media");
     }
   },
   computed: {
@@ -83,16 +84,21 @@ export default {
     async submitForm(formName) {
       this.$refs[formName].validate(async valid => {
         if (valid) {
-					let formString = {'UserName': this.loginForm.username, 'UserPwd': this.loginForm.password, 'VerificationCode': this.loginForm.verificationCode, 'VerificationCodeUID': this.loginForm.verificationCodeUID};
-					let loginData = new FormData();
-      		loginData.append("Act", "User_Login");
-					loginData.append("Param", JSON.stringify(formString));
-					const res = await login(loginData);
+          let formString = {
+            UserName: this.loginForm.username,
+            UserPwd: this.loginForm.password,
+            VerificationCode: this.loginForm.verificationCode,
+            VerificationCodeUID: this.loginForm.verificationCodeUID
+          };
+          let loginData = new FormData();
+          loginData.append("Act", "User_Login");
+          loginData.append("Param", JSON.stringify(formString));
+          const res = await login(loginData);
           if (res.Result) {
             localStorage.adminInfo = JSON.stringify(res.Data);
             this.saveAdminInfo(res.Data);
             console.log(this.adminInfo);
-            
+
             this.$message({
               type: "success",
               message: "登录成功"
@@ -115,18 +121,28 @@ export default {
       });
     },
     async getVerificationCodeImg() {
-      let data = new FormData();
-      data.append("Act", "Common_GetRandomUID");
-      data.append("Param", "{}");
-      const res = await getCode(data);
-      if (res.Result) {
-        this.loginForm.verificationCodeUID = res.Data.RandomUID;
-        this.loginForm.codeUIDRandom = this.loginForm.verificationCodeUID ;
-				// this.loginForm.verificationCodeImg += this.loginForm.verificationCodeUID;
+      try {
+        let data = new FormData();
+        data.append("Act", "Common_GetRandomUID");
+        data.append("Param", "{}");
+        const res = await getCode(data);
+        if (res.Result) {
+          this.loginForm.verificationCodeUID = res.Data.RandomUID;
+          this.loginForm.codeUIDRandom = this.loginForm.verificationCodeUID;
+          // this.loginForm.verificationCodeImg += this.loginForm.verificationCodeUID;
+        } else {
+          // this.$message.error(res);
+        }
+      } catch (error) {
+        this.$message({
+          type:'error',
+          msg:error
+        })
       }
     },
-    changeCodeImg(){
-      this.loginForm.codeUIDRandom = this.loginForm.verificationCodeUID + '&d=' +Math.random();
+    changeCodeImg() {
+      this.loginForm.codeUIDRandom =
+        this.loginForm.verificationCodeUID + "&d=" + Math.random();
     }
   },
   watch: {

@@ -11,6 +11,7 @@ module.exports = {
   entry: {
     entry: ['babel-polyfill', './src/main.js']
   },
+  devtool:'inline-source-map',
   output: {
     path: config.build.assetsRoot,
     filename: '[name].js',

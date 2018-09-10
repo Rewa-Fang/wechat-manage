@@ -120,6 +120,7 @@ export default {
         }
       });
     },
+
     async getVerificationCodeImg() {
       try {
         let data = new FormData();

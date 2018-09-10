@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import state from '@/store/index'
+// import message from '@/page/message'
 
 Vue.use(Router)
 
@@ -10,6 +11,8 @@ const home = r => require.ensure([], () => r(require('@/page/home')), 'home');
 const media = r => require.ensure([], () => r(require('@/page/media')), 'media');
 const fans = r => require.ensure([], () => r(require('@/page/fans')), 'fans');
 const editNews = r => require.ensure([], () => r(require('@/page/news/editNews')), 'editNews');
+//消息管理
+const message = r => require.ensure([], () => r(require('@/page/message')), 'message');
 
 const routes = [
 	{
@@ -40,7 +43,13 @@ const routes = [
 			path:'/fans',
 			component:fans,
 			name: 'Fans'
-		}]
+		},
+		{
+			path:'/message',
+			components:message,
+			name:'Message'
+		}
+	]
 	},
 ];
 const router = new Router({
@@ -53,6 +62,7 @@ router.beforeEach((to, from, next) => {
 	// 对路由变化作出响应...
 	// console.log(router,to)
 	// console.log(to)
+
 	// console.log(to,$.param( to.query ),window.location.href)
 
 	//全局拦截器的

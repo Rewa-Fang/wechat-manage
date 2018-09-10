@@ -212,6 +212,7 @@ export default {
           this.checkedImageArr[index] = img.ID;
         });
         this.checkedImageArr = [...this.checkedImageArr];
+        Console.log(this.checkedImageArr);
         this.checkedStyleArr = this.checkedImageArr;
         // console.log(this.checkedImageArr);
         // this.delBtnDisabled = false;

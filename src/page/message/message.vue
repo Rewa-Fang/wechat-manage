@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import header from "../components/media/header";
+import header from "@/components/media/header";
 export default {
   components: {
     mediaHeader: header

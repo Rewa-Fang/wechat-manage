@@ -8,11 +8,11 @@ Vue.use(Router)
 const login = r => require.ensure([], () => r(require('@/page/login')), 'login');
 const manage = r => require.ensure([], () => r(require('@/page/manage')), 'manage');
 const home = r => require.ensure([], () => r(require('@/page/home')), 'home');
-const media = r => require.ensure([], () => r(require('@/page/media')), 'media');
-const fans = r => require.ensure([], () => r(require('@/page/fans')), 'fans');
-const editNews = r => require.ensure([], () => r(require('@/page/news/editNews')), 'editNews');
+const media = r => require.ensure([], () => r(require('@/page/media/media')), 'media');
+const fans = r => require.ensure([], () => r(require('@/page/fans/fans')), 'fans');
+const editNews = r => require.ensure([], () => r(require('@/page/media/news/editNews')), 'editNews');
 //消息管理
-const message = r => require.ensure([], () => r(require('@/page/message')), 'message');
+const message = r => require.ensure([], () => r(require('@/page/message/message')), 'message');
 
 const routes = [
 	{
@@ -46,7 +46,7 @@ const routes = [
 		},
 		{
 			path:'/message',
-			components:message,
+			component:message,
 			name:'Message'
 		}
 	]
